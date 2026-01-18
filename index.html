@@ -1,224 +1,901 @@
 <!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>HTML Đã Ghép</title></head>
+<body><iframe style="width:100%;height:100vh;border:none" srcdoc='<!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<title>App Ghép HTML Hoàn Chỉnh</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<style>
-body { margin:0; font-family: Arial, sans-serif; background:#f2f2f2 }
-#toolbar {
-    background:#1e1e1e; color:white; padding:10px;
-}
-#toolbar input, #toolbar button {
-    margin:4px 4px 0 0;
-    padding:8px 12px;
-    border:none;
-    border-radius:6px;
-    font-weight:bold;
-}
-.load { background:#2196F3; color:white }
-.backup { background:#4CAF50; color:white }
-.restore { background:#FF9800; color:white }
-.reset { background:#f44336; color:white }
-.export { background:#9C27B0; color:white }
-
-#tabs {
-    display:flex; overflow-x:auto; background:#333;
-}
-.tab {
-    padding:10px 15px;
-    color:#ccc;
-    cursor:pointer;
-    white-space:nowrap;
-    border-right:1px solid #444;
-}
-.tab.active {
-    background:#2196F3;
-    color:white;
-}
-
-#content {
-    height: calc(100vh - 140px);
-}
-iframe {
-    width:100%;
-    height:100%;
-    border:none;
-    display:none;
-}
-iframe.active { display:block }
-</style>
-</head>
-
-<body>
-
-<div id="toolbar">
-    <input type="file" multiple accept=".html" onchange="loadFiles(this.files)">
-    <br>
-    <button class="backup" onclick="backupAll()">💾 Sao lưu (.json)</button>
-    <button class="restore" onclick="document.getElementById('restoreFile').click()">♻️ Khôi phục</button>
-    <button class="reset" onclick="resetAll()">🗑️ Reset tất cả</button>
-    <button class="export" onclick="exportMergedHTML()">⬇️ Tải HTML hoàn chỉnh</button>
-    <input type="file" id="restoreFile" accept=".json" hidden onchange="restoreAll(this.files[0])">
-</div>
-
-<div id="tabs"></div>
-<div id="content"></div>
-
-<script>
-let tabCount = 0;
-let frames = {};
-let tabsMeta = [];
-
-function loadFiles(files) {
-    for (let file of files) createTab(file);
-}
-
-function createTab(file) {
-    tabCount++;
-    const id = "tab" + tabCount;
-
-    const tab = document.createElement("div");
-    tab.className = "tab";
-    tab.textContent = file.name;
-    tab.id = "btn_" + id;
-    tab.onclick = () => activate(id);
-    tabs.appendChild(tab);
-
-    const iframe = document.createElement("iframe");
-    iframe.id = id;
-
-    const reader = new FileReader();
-    reader.onload = e => iframe.srcdoc = e.target.result;
-    reader.readAsText(file);
-
-    content.appendChild(iframe);
-
-    frames[id] = iframe;
-    tabsMeta.push({ id, title: file.name });
-
-    activate(id);
-}
-
-function activate(id) {
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll("iframe").forEach(f => f.classList.remove("active"));
-    document.getElementById("btn_" + id).classList.add("active");
-    document.getElementById(id).classList.add("active");
-}
-
-/* ===== BACKUP ===== */
-function backupAll() {
-    let data = {};
-    for (let id in frames) {
-        try { data[id] = { ...frames[id].contentWindow.localStorage }; }
-        catch {}
-    }
-    downloadJSON(data, "backup_all_tabs.json");
-}
-
-/* ===== RESTORE ===== */
-function restoreAll(file) {
-    const r = new FileReader();
-    r.onload = e => {
-        const data = JSON.parse(e.target.result);
-        for (let id in data) {
-            if (frames[id]) {
-                frames[id].contentWindow.localStorage.clear();
-                for (let k in data[id]) {
-                    frames[id].contentWindow.localStorage.setItem(k, data[id][k]);
-                }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tính toán sản phẩm</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body { 
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            padding: 10px;
+            background-color: #f5f5f5;
+        }
+        
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        h3 {
+            margin: 15px 0 8px;
+            color: #444;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            margin-bottom: 15px;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px 5px;
+        }
+        
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        
+        input {
+            width: 100%;
+            height: 40px;
+            text-align: center;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px;
+        }
+        
+        input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            flex: 1;
+            min-width: 120px;
+            height: 45px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        .save-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .percent-display {
+            background-color: #2196F3;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        
+        .input-group {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .input-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .input-row label {
+            flex: 0 0 120px;
+            font-weight: bold;
+        }
+        
+        .input-row input {
+            flex: 1;
+        }
+        
+        .saved-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .saved-time {
+            flex: 1;
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .delete-icon {
+            color: #f44336;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                font-size: 13px;
+                padding: 8px;
+            }
+            
+            th, td {
+                padding: 8px 3px;
+                font-size: 12px;
+            }
+            
+            input {
+                height: 35px;
+                font-size: 14px;
+            }
+            
+            button {
+                height: 40px;
+                font-size: 14px;
+                min-width: 100px;
+            }
+            
+            .input-row label {
+                flex: 0 0 100px;
+                font-size: 13px;
             }
         }
-        alert("✅ Đã khôi phục xong – tải lại trang để áp dụng");
-    };
-    r.readAsText(file);
-}
+    </style>
+</head>
 
-/* ===== RESET ===== */
-function resetAll() {
-    if (!confirm("XÓA TOÀN BỘ DỮ LIỆU CỦA TẤT CẢ TAB?")) return;
-    for (let id in frames) {
-        try { frames[id].contentWindow.localStorage.clear(); } catch {}
-    }
-    alert("🗑️ Đã reset toàn bộ dữ liệu");
-}
+<body>
+    <h2>📱 Tính toán sản phẩm</h2>
 
-/* ===== EXPORT HTML ===== */
-function exportMergedHTML() {
-    let payload = tabsMeta.map(t => ({
-        id: t.id,
-        title: t.title,
-        html: frames[t.id].srcdoc
-    }));
+    <table>
+        <tr>
+            <th></th>
+            <th>Cuộn 1</th>
+            <th>Cuộn 2</th>
+            <th>Cuộn 3</th>
+            <th>Tổng</th>
+        </tr>
 
-    const html = `
-<!DOCTYPE html>
+        <tr>
+            <td>Hàng ra</td>
+            <td><input id="ra1" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhToan()"></td>
+            <td><input id="ra2" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhToan()"></td>
+            <td><input id="ra3" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhToan()"></td>
+            <td id="tongRa">0</td>
+        </tr>
+
+        <tr>
+            <td>Hàng làm</td>
+            <td><input id="lam1" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhToan()"></td>
+            <td><input id="lam2" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhToan()"></td>
+            <td><input id="lam3" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhToan()"></td>
+            <td id="tongLam">0</td>
+        </tr>
+
+        <tr>
+            <td>Hàng hỏng</td>
+            <td id="hong1">0</td>
+            <td id="hong2">0</td>
+            <td id="hong3">0</td>
+            <td id="tongHong">0</td>
+        </tr>
+    </table>
+
+    <div class="percent-display">
+        Phần trăm làm được: <span id="phanTram">0</span>%
+    </div>
+
+    <div class="input-group">
+        <h3>📊 Nhập theo % (tự sinh dữ liệu)</h3>
+        <div class="input-row">
+            <label>Tổng làm được:</label>
+            <input id="lamTongNhap" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhNguoc()">
+        </div>
+        <div class="input-row">
+            <label>Phần trăm (%):</label>
+            <input id="phanTramNhap" type="number" step="0.1" inputmode="decimal" oninput="tinhNguoc()">
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button class="save-btn" onclick="luuDuLieu()">💾 Lưu</button>
+        <button class="delete-btn" onclick="xoaTatCa()">🗑️ Xóa tất cả</button>
+    </div>
+
+    <h3>📋 Dữ liệu đã lưu</h3>
+    <div id="dsLuu"></div>
+
+    <script>
+        const ra1 = document.getElementById("ra1");
+        const ra2 = document.getElementById("ra2");
+        const ra3 = document.getElementById("ra3");
+        const lam1 = document.getElementById("lam1");
+        const lam2 = document.getElementById("lam2");
+        const lam3 = document.getElementById("lam3");
+
+        // Tự động focus vào ô đầu tiên khi trang load
+        window.onload = function() {
+            ra1.focus();
+        };
+
+        function tinhToan() {
+            let r1 = +ra1.value || 0, r2 = +ra2.value || 0, r3 = +ra3.value || 0;
+            let l1 = +lam1.value || 0, l2 = +lam2.value || 0, l3 = +lam3.value || 0;
+
+            // Giới hạn số âm
+            r1 = Math.max(0, r1);
+            r2 = Math.max(0, r2);
+            r3 = Math.max(0, r3);
+            l1 = Math.max(0, l1);
+            l2 = Math.max(0, l2);
+            l3 = Math.max(0, l3);
+
+            let tongRa = r1 + r2 + r3;
+            let tongLam = l1 + l2 + l3;
+
+            document.getElementById("tongRa").innerText = tongRa;
+            document.getElementById("tongLam").innerText = tongLam;
+
+            document.getElementById("hong1").innerText = Math.max(0, r1 - l1);
+            document.getElementById("hong2").innerText = Math.max(0, r2 - l2);
+            document.getElementById("hong3").innerText = Math.max(0, r3 - l3);
+            document.getElementById("tongHong").innerText = Math.max(0, tongRa - tongLam);
+
+            document.getElementById("phanTram").innerText =
+                tongRa ? (tongLam / tongRa * 100).toFixed(2) : 0;
+        }
+
+        /* ===== TÍNH NGƯỢC – DAO ĐỘNG % ===== */
+        function tinhNguoc() {
+            let tongLam = +lamTongNhap.value || 0;
+            let pTB = +phanTramNhap.value || 0;
+            
+            if (!tongLam || !pTB) return;
+
+            let d1 = Math.random() * 1.2 - 0.6;
+            let d2 = Math.random() * 1.2 - 0.6;
+
+            let p1 = pTB + d1;
+            let p2 = pTB + d2;
+            let p3 = pTB * 3 - p1 - p2;
+
+            // Đảm bảo phần trăm không âm
+            p1 = Math.max(0, p1);
+            p2 = Math.max(0, p2);
+            p3 = Math.max(0, p3);
+
+            let l1 = Math.round(tongLam / 3);
+            let l2 = Math.round(tongLam / 3);
+            let l3 = tongLam - l1 - l2;
+
+            // Đảm bảo không âm
+            l1 = Math.max(0, l1);
+            l2 = Math.max(0, l2);
+            l3 = Math.max(0, l3);
+
+            lam1.value = l1;
+            lam2.value = l2;
+            lam3.value = l3;
+
+            ra1.value = p1 ? Math.round(l1 / (p1 / 100)) : 0;
+            ra2.value = p2 ? Math.round(l2 / (p2 / 100)) : 0;
+            ra3.value = p3 ? Math.round(l3 / (p3 / 100)) : 0;
+
+            tinhToan();
+        }
+
+        /* ===== LƯU DỮ LIỆU ===== */
+        function luuDuLieu() {
+            // Kiểm tra nếu không có dữ liệu
+            if (!ra1.value && !ra2.value && !ra3.value && 
+                !lam1.value && !lam2.value && !lam3.value) {
+                alert("Vui lòng nhập dữ liệu trước khi lưu!");
+                return;
+            }
+
+            let data = {
+                ra1: ra1.value || 0,
+                ra2: ra2.value || 0,
+                ra3: ra3.value || 0,
+                lam1: lam1.value || 0,
+                lam2: lam2.value || 0,
+                lam3: lam3.value || 0,
+                time: new Date().toLocaleString()
+            };
+            
+            let ds = JSON.parse(localStorage.getItem("tonghang")) || [];
+            ds.push(data);
+            localStorage.setItem("tonghang", JSON.stringify(ds));
+            
+            hienThi();
+            alert("Đã lưu dữ liệu!");
+        }
+
+        function hienThi() {
+            let ds = JSON.parse(localStorage.getItem("tonghang")) || [];
+            dsLuu.innerHTML = "";
+            
+            if (ds.length === 0) {
+                dsLuu.innerHTML = &#39;<div class="saved-item">Chưa có dữ liệu</div>&#39;;
+                return;
+            }
+            
+            // Hiển thị theo thứ tự mới nhất lên đầu
+            ds.reverse().forEach((d, i) => {
+                dsLuu.innerHTML += `
+                <div class="saved-item">
+                    <span class="saved-time" onclick="load(${ds.length - 1 - i})">
+                        📅 ${d.time}<br>
+                        <small>Ra: ${d.ra1}/${d.ra2}/${d.ra3} | Làm: ${d.lam1}/${d.lam2}/${d.lam3}</small>
+                    </span>
+                    <span class="delete-icon" onclick="xoa(${ds.length - 1 - i})">❌</span>
+                </div>`;
+            });
+        }
+
+        function load(i) {
+            let ds = JSON.parse(localStorage.getItem("tonghang")) || [];
+            // Đảo ngược index vì đã reverse khi hiển thị
+            let actualIndex = ds.length - 1 - i;
+            let d = ds[actualIndex];
+            
+            ra1.value = d.ra1;
+            ra2.value = d.ra2;
+            ra3.value = d.ra3;
+            lam1.value = d.lam1;
+            lam2.value = d.lam2;
+            lam3.value = d.lam3;
+            tinhToan();
+            
+            // Cuộn lên đầu trang
+            window.scrollTo(0, 0);
+        }
+
+        function xoa(i) {
+            if (!confirm("Bạn có chắc muốn xóa dữ liệu này?")) return;
+            
+            let ds = JSON.parse(localStorage.getItem("tonghang")) || [];
+            // Đảo ngược index vì đã reverse khi hiển thị
+            let actualIndex = ds.length - 1 - i;
+            ds.splice(actualIndex, 1);
+            localStorage.setItem("tonghang", JSON.stringify(ds));
+            hienThi();
+        }
+
+        function xoaTatCa() {
+            if (!confirm("Bạn có chắc muốn xóa TẤT CẢ dữ liệu đã lưu?")) return;
+            
+            localStorage.removeItem("tonghang");
+            hienThi();
+            alert("Đã xóa tất cả dữ liệu!");
+        }
+
+        // Hiển thị dữ liệu đã lưu khi tải trang
+        hienThi();
+    </script>
+</body>
+</html>'></iframe>
+<iframe style="width:100%;height:100vh;border:none" srcdoc='<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>App HTML Đã Ghép</title>
+<title>Ghi chép chi tiêu</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{margin:0;font-family:Arial}
-#tabs{display:flex;background:#333}
-.tab{padding:10px;color:#ccc;cursor:pointer}
-.tab.active{background:#2196F3;color:white}
-iframe{width:100%;height:calc(100vh - 40px);border:none;display:none}
-iframe.active{display:block}
+body {
+    font-family: &#39;Segoe UI&#39;, Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    padding: 15px;
+    margin: 0;
+    min-height: 100vh;
+}
+h2 { 
+    text-align: center; 
+    color: #2c3e50;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #3498db;
+}
+input, textarea, button {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    font-size: 16px;
+    border-radius: 6px;
+    box-sizing: border-box;
+    border: 1px solid #ddd;
+}
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+button {
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+button:active {
+    transform: translateY(0);
+}
+.add { 
+    background: linear-gradient(to right, #27ae60, #2ecc71);
+}
+.save { 
+    background: linear-gradient(to right, #2980b9, #3498db);
+}
+.delete { 
+    background: linear-gradient(to right, #c0392b, #e74c3c);
+}
+.edit { 
+    background: linear-gradient(to right, #d35400, #e67e22);
+}
+.buttons-row {
+    display: flex;
+    gap: 10px;
+    margin: 10px 0;
+}
+.buttons-row button {
+    flex: 1;
+}
+
+.category {
+    background: white;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+.category:hover {
+    box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+}
+.entry {
+    border-bottom: 1px dashed #e0e0e0;
+    padding: 12px 0;
+    font-size: 15px;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.entry:hover {
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.entry-content {
+    flex: 1;
+}
+.entry-actions {
+    display: none;
+    gap: 8px;
+}
+.entry:hover .entry-actions {
+    display: flex;
+}
+.entry-actions button {
+    width: auto;
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 4px;
+}
+.entry-amount {
+    font-weight: bold;
+    color: #2c3e50;
+}
+.entry-note {
+    color: #7f8c8d;
+    font-size: 13px;
+    margin-top: 3px;
+}
+.entry-time {
+    color: #95a5a6;
+    font-size: 12px;
+    margin-top: 3px;
+}
+.total {
+    font-weight: bold;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px solid #3498db;
+    color: #2c3e50;
+    font-size: 16px;
+}
+#grandTotal {
+    background: linear-gradient(to right, #2c3e50, #34495e);
+    color: white;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.category-title {
+    color: #2c3e50;
+    margin: 0;
+}
+.category-delete {
+    width: auto;
+    padding: 6px 12px;
+    font-size: 13px;
+}
+.empty-state {
+    text-align: center;
+    color: #7f8c8d;
+    padding: 30px;
+    font-style: italic;
+}
+.entry-form {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+.icon {
+    margin-right: 5px;
+}
 </style>
 </head>
 <body>
-<div id="tabs"></div>
-<div id="content"></div>
+
+<h2>📒 Ghi chép chi tiêu</h2>
+
+<input id="newCategory" placeholder="Tên hạng mục mới">
+<div class="buttons-row">
+    <button class="add" onclick="addCategory()">
+        <span class="icon">➕</span> Thêm hạng mục
+    </button>
+</div>
+
+<div class="buttons-row">
+    <button class="save" onclick="exportJSON()">
+        <span class="icon">💾</span> Lưu dữ liệu (.json)
+    </button>
+    <button class="delete" onclick="clearAll()">
+        <span class="icon">🗑️</span> Xóa toàn bộ dữ liệu
+    </button>
+</div>
+
+<div id="categories"></div>
+<div id="grandTotal">Tổng tất cả: 0</div>
+
 <script>
-const data = ${JSON.stringify(payload)};
-let frames={};
-function init(){
-data.forEach((t,i)=>{
- let tab=document.createElement("div");
- tab.className="tab";
- tab.textContent=t.title;
- tab.id="btn_"+t.id;
- tab.onclick=()=>activate(t.id);
- tabs.appendChild(tab);
+let data = JSON.parse(localStorage.getItem("expenses")) || {};
 
- let f=document.createElement("iframe");
- f.id=t.id;
- f.srcdoc=t.html;
- content.appendChild(f);
- frames[t.id]=f;
- if(i===0) activate(t.id);
+function save(){ localStorage.setItem("expenses", JSON.stringify(data)); }
+
+function addCategory(){
+    const name = newCategory.value.trim();
+    if(!name) return alert("Vui lòng nhập tên hạng mục!");
+    if(data[name]) return alert("Hạng mục đã tồn tại!");
+    
+    data[name] = [];
+    newCategory.value = "";
+    save(); 
+    render();
+}
+
+function deleteCategory(cat){
+    if(confirm(`Xóa toàn bộ hạng mục "${cat}"?`)){
+        delete data[cat];
+        save(); 
+        render();
+    }
+}
+
+function addEntry(cat){
+    const a = document.getElementById(`amount-${cat}`);
+    const n = document.getElementById(`note-${cat}`);
+    
+    if(!a.value || parseFloat(a.value) <= 0) {
+        alert("Vui lòng nhập số tiền hợp lệ!");
+        a.focus();
+        return;
+    }
+
+    data[cat].unshift({
+        amount: parseFloat(a.value),
+        note: n.value,
+        time: new Date().toLocaleString("vi-VN")
+    });
+    
+    a.value = ""; 
+    n.value = "";
+    save(); 
+    render();
+}
+
+function editEntry(cat, i){
+    const e = data[cat][i];
+    const amount = prompt("Sửa số tiền:", e.amount);
+    if(amount === null || amount === "") return;
+    
+    const note = prompt("Sửa ghi chú:", e.note);
+    e.amount = parseFloat(amount);
+    e.note = note;
+    e.time = new Date().toLocaleString("vi-VN") + " (đã sửa)";
+    
+    save(); 
+    render();
+}
+
+function deleteEntry(cat, i){
+    if(confirm("Xóa khoản chi này?")){
+        data[cat].splice(i,1);
+        save(); 
+        render();
+    }
+}
+
+function clearAll(){
+    if(confirm("Bạn có chắc chắn muốn XÓA TOÀN BỘ dữ liệu không?\nHành động này không thể hoàn tác!")){
+        data = {};
+        save(); 
+        render();
+    }
+}
+
+function exportJSON(){
+    if(Object.keys(data).length === 0) {
+        alert("Không có dữ liệu để xuất!");
+        return;
+    }
+    
+    const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `chi_tieu_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    
+    alert("Dữ liệu đã được xuất thành công!");
+}
+
+function render(){
+    const c = document.getElementById("categories");
+    c.innerHTML = "";
+    let grand = 0;
+
+    if(Object.keys(data).length === 0) {
+        c.innerHTML = `<div class="empty-state">Chưa có hạng mục nào. Hãy thêm hạng mục đầu tiên!</div>`;
+        document.getElementById("grandTotal").innerText = "Tổng tất cả: 0";
+        return;
+    }
+
+    for(let cat in data){
+        let sum = 0;
+        let html = `<div class="category">
+            <div class="category-header">
+                <h3 class="category-title">${cat}</h3>
+                <button class="delete category-delete" onclick="deleteCategory(&#39;${cat}&#39;)">
+                    <span class="icon">🗑️</span> Xóa hạng mục
+                </button>
+            </div>
+            
+            <div class="entry-form">
+                <input id="amount-${cat}" type="number" placeholder="Số tiền" min="1">
+                <textarea id="note-${cat}" placeholder="Ghi chú (có thể bỏ qua)" rows="2"></textarea>
+                <button class="add" onclick="addEntry(&#39;${cat}&#39;)">
+                    <span class="icon">➕</span> Thêm khoản chi
+                </button>
+            </div>`;
+
+        if(data[cat].length === 0) {
+            html += `<div class="empty-state">Chưa có khoản chi nào trong hạng mục này</div>`;
+        } else {
+            data[cat].forEach((e,i)=>{
+                sum += e.amount;
+                html += `<div class="entry">
+                    <div class="entry-content">
+                        <div class="entry-amount">💰 ${e.amount.toLocaleString()} VND</div>
+                        ${e.note ? `<div class="entry-note">📝 ${e.note}</div>` : ""}
+                        <div class="entry-time">⏰ ${e.time}</div>
+                    </div>
+                    <div class="entry-actions">
+                        <button class="edit" onclick="editEntry(&#39;${cat}&#39;,${i})">
+                            <span class="icon">✏️</span> Sửa
+                        </button>
+                        <button class="delete" onclick="deleteEntry(&#39;${cat}&#39;,${i})">
+                            <span class="icon">❌</span> Xóa
+                        </button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        grand += sum;
+        html += `<div class="total">Tổng ${cat}: <span style="color:#27ae60">${sum.toLocaleString()} VND</span></div></div>`;
+        c.innerHTML += html;
+    }
+    
+    document.getElementById("grandTotal").innerText = `Tổng tất cả: ${grand.toLocaleString()} VND`;
+}
+
+// Khởi chạy ứng dụng
+document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+    render();
+    
+    // Thêm sự kiện nhấn Enter để thêm hạng mục
+    document.getElementById(&#39;newCategory&#39;).addEventListener(&#39;keypress&#39;, function(e) {
+        if(e.key === &#39;Enter&#39;) addCategory();
+    });
 });
-}
-function activate(id){
-document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-document.querySelectorAll("iframe").forEach(f=>f.classList.remove("active"));
-document.getElementById("btn_"+id).classList.add("active");
-document.getElementById(id).classList.add("active");
-}
-init();
-<\/script>
+</script>
 </body>
-</html>`;
-    downloadHTML(html, "app_html_hoan_chinh.html");
-}
+</html>'></iframe>
+<iframe style="width:100%;height:100vh;border:none" srcdoc='<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tính Lương Nhân Viên</title>
+<style>
+body { font-family: Arial; text-align: center; padding: 20px; }
+input { margin: 5px; padding: 8px; width: 250px; text-align: center; }
+button { padding: 10px; margin-top: 10px; cursor: pointer; }
+table { margin: 20px auto; border-collapse: collapse; width: 95%; max-width: 650px; }
+th, td { border: 1px solid #ccc; padding: 8px; text-align: right; }
+th { background: #f2f2f2; }
+td:first-child, th:first-child { text-align: left; }
+</style>
+</head>
 
-function downloadJSON(obj, name) {
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 2)], {type:"application/json"}));
-    a.download = name;
-    a.click();
-}
+<body>
+<h2>TÍNH LƯƠNG NHÂN VIÊN</h2>
 
-function downloadHTML(text, name) {
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(new Blob([text], {type:"text/html"}));
-    a.download = name;
-    a.click();
+<label>Số ngày làm CA NGÀY:</label><br>
+<input type="number" id="dayShiftDays" min="0"><br>
+
+<label>Số ngày làm CA ĐÊM (19h – 6h):</label><br>
+<input type="number" id="nightShiftDays" min="0"><br>
+
+<hr>
+
+<label>Số ngày làm thứ 7:</label><br>
+<input type="number" id="saturday8h" placeholder="8 tiếng">
+<input type="number" id="saturday10h" placeholder="10 tiếng"><br>
+
+<label>Số ngày làm chủ nhật:</label><br>
+<input type="number" id="sunday8h" placeholder="8 tiếng">
+<input type="number" id="sunday10h" placeholder="10 tiếng"><br>
+
+<label>Số chuyên cần (1 = 80,240 won):</label><br>
+<input type="number" id="attendanceBonusCount" min="0"><br>
+
+<label>
+<input type="checkbox" id="includeAllowance" checked>
+Cộng phụ cấp cố định 200,000 won
+</label><br><br>
+
+<button onclick="calculateSalary()">TÍNH LƯƠNG</button>
+
+<div id="salaryDetails"></div>
+
+<script>
+function calculateSalary() {
+
+const rate = 10030;
+const taxRate = 0.05;
+
+// CA NGÀY (8h thường + 2h tăng ca)
+const dayShiftSalary = (8 * rate) + (2 * rate * 1.5);
+
+// CA ĐÊM (3h thường + 7.5h đêm ×1.5)
+const nightShiftSalary = (3 * rate) + (7.5 * rate * 1.5);
+
+// Thứ 7 & CN
+const sat8 = 8 * rate * 1.5;
+const sat10 = 10 * rate * 1.5;
+const sun8 = 8 * rate * 1.5;
+const sun10 = 10 * rate * 1.5;
+
+const attendanceUnit = 80240;
+const allowance = document.getElementById("includeAllowance").checked ? 200000 : 0;
+
+// Input
+let dayDays = +dayShiftDays.value || 0;
+let nightDays = +nightShiftDays.value || 0;
+let sat8d = +saturday8h.value || 0;
+let sat10d = +saturday10h.value || 0;
+let sun8d = +sunday8h.value || 0;
+let sun10d = +sunday10h.value || 0;
+let attendance = +attendanceBonusCount.value || 0;
+
+// Tính
+let dayTotal = dayDays * dayShiftSalary;
+let nightTotal = nightDays * nightShiftSalary;
+let total =
+dayTotal + nightTotal +
+sat8d * sat8 + sat10d * sat10 +
+sun8d * sun8 + sun10d * sun10 +
+attendance * attendanceUnit + allowance;
+
+let tax = total * taxRate;
+let net = total - tax;
+
+// Hiển thị
+salaryDetails.innerHTML = `
+<table>
+<tr><th>Khoản</th><th>Tiền (won)</th></tr>
+<tr><td>Ca ngày (${dayDays} ngày)</td><td>${dayTotal.toLocaleString()}</td></tr>
+<tr><td>Ca đêm (${nightDays} ngày)</td><td>${nightTotal.toLocaleString()}</td></tr>
+<tr><td>Thứ 7</td><td>${(sat8d*sat8 + sat10d*sat10).toLocaleString()}</td></tr>
+<tr><td>Chủ nhật</td><td>${(sun8d*sun8 + sun10d*sun10).toLocaleString()}</td></tr>
+<tr><td>Chuyên cần</td><td>${(attendance*attendanceUnit).toLocaleString()}</td></tr>
+<tr><td>Phụ cấp</td><td>${allowance.toLocaleString()}</td></tr>
+<tr><th>Tổng trước thuế</th><th>${total.toLocaleString()}</th></tr>
+<tr><td>Thuế 5%</td><td>${tax.toLocaleString()}</td></tr>
+<tr><th>Thực nhận</th><th>${net.toLocaleString()}</th></tr>
+</table>`;
 }
 </script>
-
 </body>
+</html>'></iframe></body>
 </html>
