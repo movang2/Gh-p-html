@@ -1,437 +1,286 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>HTML Đã Ghép</title></head>
-<body><iframe style="width:100%;height:100vh;border:none" srcdoc='<!DOCTYPE html>
-<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tính toán sản phẩm</title>
+    <title>Merged App</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body { 
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            padding: 10px;
-            background-color: #f5f5f5;
-        }
-        
-        h2 {
-            text-align: center;
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        h3 {
-            margin: 15px 0 8px;
-            color: #444;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: center;
-            margin-bottom: 15px;
-            background-color: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px 5px;
-        }
-        
-        th {
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-        }
-        
-        input {
-            width: 100%;
-            height: 40px;
-            text-align: center;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 5px;
-        }
-        
-        input:focus {
-            border-color: #4CAF50;
-            outline: none;
-        }
-        
-        .button-container {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
-            flex-wrap: wrap;
-        }
-        
-        button {
-            flex: 1;
-            min-width: 120px;
-            height: 45px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        button:active {
-            transform: scale(0.98);
-        }
-        
-        .save-btn {
-            background-color: #4CAF50;
-            color: white;
-        }
-        
-        .delete-btn {
-            background-color: #f44336;
-            color: white;
-        }
-        
-        .percent-display {
-            background-color: #2196F3;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            margin: 15px 0;
-        }
-        
-        .input-group {
-            background-color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .input-row {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .input-row label {
-            flex: 0 0 120px;
-            font-weight: bold;
-        }
-        
-        .input-row input {
-            flex: 1;
-        }
-        
-        .saved-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: white;
-            border: 1px solid #ddd;
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 8px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-        }
-        
-        .saved-time {
-            flex: 1;
-            color: #666;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        
-        .delete-icon {
-            color: #f44336;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 5px;
-        }
-        
-        @media (max-width: 480px) {
-            body {
-                font-size: 13px;
-                padding: 8px;
-            }
-            
-            th, td {
-                padding: 8px 3px;
-                font-size: 12px;
-            }
-            
-            input {
-                height: 35px;
-                font-size: 14px;
-            }
-            
-            button {
-                height: 40px;
-                font-size: 14px;
-                min-width: 100px;
-            }
-            
-            .input-row label {
-                flex: 0 0 100px;
-                font-size: 13px;
-            }
-        }
+        body { font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        .nav { display: flex; background: #2c3e50; color: white; list-style: none; padding: 0; margin: 0; overflow-x: auto; }
+        .nav li { padding: 15px 25px; cursor: pointer; border-bottom: 3px solid transparent; }
+        .nav li.active { background: #34495e; border-bottom: 3px solid #3498db; }
+        .tab-content { display: none; flex: 1; }
+        .tab-content.active { display: block; }
+        iframe { width: 100%; height: 100%; border: none; }
     </style>
+</head>
+<body>
+    <ul class="nav"><li onclick="openTab(event, 'tab-0')" class="active">Tính hàng</li><li onclick="openTab(event, 'tab-1')" class="">Chi tiêu</li><li onclick="openTab(event, 'tab-2')" class="">Tính Lương</li></ul>
+    
+            <div id="tab-0" class="tab-content active">
+                <iframe srcdoc="<!DOCTYPE html>
+<html lang=&quot;vi&quot;>
+<head>
+<meta charset=&quot;UTF-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
+<title>Tính toán sản phẩm PRO</title>
+
+<style>
+body{font-family:Arial;padding:10px;background:#f5f5f5;}
+table{width:100%;border-collapse:collapse;text-align:center;background:white;margin-bottom:15px;}
+th,td{border:1px solid #ddd;padding:8px;}
+th{background:#4CAF50;color:white;}
+input{width:100%;height:35px;text-align:center;font-size:16px;}
+button{width:100%;height:45px;margin-top:10px;border:none;border-radius:8px;font-weight:bold;font-size:16px;cursor:pointer;}
+.start-btn{background:#FF9800;color:white;}
+.save-btn{background:#4CAF50;color:white;}
+.clear-btn{background:#f44336;color:white;}
+.percent-box{background:#2196F3;color:white;padding:10px;border-radius:8px;font-size:18px;text-align:center;margin:10px 0;}
+.box{background:white;padding:10px;border-radius:8px;margin-bottom:15px;}
+.saved-item{background:white;border:1px solid #ddd;padding:10px;margin-top:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;}
+.delete{color:red;cursor:pointer;font-size:18px;}
+</style>
 </head>
 
 <body>
-    <h2>📱 Tính toán sản phẩm</h2>
 
-    <table>
-        <tr>
-            <th></th>
-            <th>Cuộn 1</th>
-            <th>Cuộn 2</th>
-            <th>Cuộn 3</th>
-            <th>Tổng</th>
-        </tr>
+<h2>📊 TÍNH TOÁN SẢN PHẨM PRO</h2>
 
-        <tr>
-            <td>Hàng ra</td>
-            <td><input id="ra1" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhToan()"></td>
-            <td><input id="ra2" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhToan()"></td>
-            <td><input id="ra3" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhToan()"></td>
-            <td id="tongRa">0</td>
-        </tr>
+<table>
+<tr>
+<th></th>
+<th>Cuộn 1</th>
+<th>Cuộn 2</th>
+<th>Cuộn 3</th>
+<th>Tổng</th>
+</tr>
 
-        <tr>
-            <td>Hàng làm</td>
-            <td><input id="lam1" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhToan()"></td>
-            <td><input id="lam2" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhToan()"></td>
-            <td><input id="lam3" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhToan()"></td>
-            <td id="tongLam">0</td>
-        </tr>
+<tr>
+<td>Hàng ra</td>
+<td><input id=&quot;ra1&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>
+<td><input id=&quot;ra2&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>
+<td><input id=&quot;ra3&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>
+<td id=&quot;tongRa&quot;>0</td>
+</tr>
 
-        <tr>
-            <td>Hàng hỏng</td>
-            <td id="hong1">0</td>
-            <td id="hong2">0</td>
-            <td id="hong3">0</td>
-            <td id="tongHong">0</td>
-        </tr>
-    </table>
+<tr>
+<td>Hàng làm</td>
+<td><input id=&quot;lam1&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>
+<td><input id=&quot;lam2&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>
+<td><input id=&quot;lam3&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>
+<td id=&quot;tongLam&quot;>0</td>
+</tr>
 
-    <div class="percent-display">
-        Phần trăm làm được: <span id="phanTram">0</span>%
-    </div>
+<tr>
+<td>Hàng hỏng</td>
+<td id=&quot;hong1&quot;>0</td>
+<td id=&quot;hong2&quot;>0</td>
+<td id=&quot;hong3&quot;>0</td>
+<td id=&quot;tongHong&quot;>0</td>
+</tr>
+</table>
 
-    <div class="input-group">
-        <h3>📊 Nhập theo % (tự sinh dữ liệu)</h3>
-        <div class="input-row">
-            <label>Tổng làm được:</label>
-            <input id="lamTongNhap" type="number" pattern="[0-9]*" inputmode="numeric" oninput="tinhNguoc()">
-        </div>
-        <div class="input-row">
-            <label>Phần trăm (%):</label>
-            <input id="phanTramNhap" type="number" step="0.1" inputmode="decimal" oninput="tinhNguoc()">
-        </div>
-    </div>
+<div class=&quot;percent-box&quot;>
+Phần trăm làm được: <span id=&quot;phanTram&quot;>0</span>%
+</div>
 
-    <div class="button-container">
-        <button class="save-btn" onclick="luuDuLieu()">💾 Lưu</button>
-        <button class="delete-btn" onclick="xoaTatCa()">🗑️ Xóa tất cả</button>
-    </div>
+<div class=&quot;box&quot;>
+<h3>📈 Nhập theo % (Tự sinh thông minh)</h3>
 
-    <h3>📋 Dữ liệu đã lưu</h3>
-    <div id="dsLuu"></div>
+<label>Tổng làm được (có thể bỏ trống):</label>
+<input id=&quot;lamTongNhap&quot; type=&quot;number&quot;>
 
-    <script>
-        const ra1 = document.getElementById("ra1");
-        const ra2 = document.getElementById("ra2");
-        const ra3 = document.getElementById("ra3");
-        const lam1 = document.getElementById("lam1");
-        const lam2 = document.getElementById("lam2");
-        const lam3 = document.getElementById("lam3");
+<label>Phần trăm trung bình (%):</label>
+<input id=&quot;phanTramNhap&quot; type=&quot;number&quot; step=&quot;0.1&quot;>
 
-        // Tự động focus vào ô đầu tiên khi trang load
-        window.onload = function() {
-            ra1.focus();
-        };
+<button class=&quot;start-btn&quot; onclick=&quot;tinhNguoc()&quot;>🚀 BẮT ĐẦU TỰ SINH</button>
+<button class=&quot;save-btn&quot; onclick=&quot;luuDuLieu()&quot;>💾 LƯU DỮ LIỆU</button>
+<button class=&quot;clear-btn&quot; onclick=&quot;xoaTatCa()&quot;>🗑️ XÓA TẤT CẢ</button>
+</div>
 
-        function tinhToan() {
-            let r1 = +ra1.value || 0, r2 = +ra2.value || 0, r3 = +ra3.value || 0;
-            let l1 = +lam1.value || 0, l2 = +lam2.value || 0, l3 = +lam3.value || 0;
+<h3>📋 Dữ liệu đã lưu</h3>
+<div id=&quot;dsLuu&quot;></div>
 
-            // Giới hạn số âm
-            r1 = Math.max(0, r1);
-            r2 = Math.max(0, r2);
-            r3 = Math.max(0, r3);
-            l1 = Math.max(0, l1);
-            l2 = Math.max(0, l2);
-            l3 = Math.max(0, l3);
+<script>
 
-            let tongRa = r1 + r2 + r3;
-            let tongLam = l1 + l2 + l3;
+function tinhToan(){
+let r1=+ra1.value||0,r2=+ra2.value||0,r3=+ra3.value||0;
+let l1=+lam1.value||0,l2=+lam2.value||0,l3=+lam3.value||0;
 
-            document.getElementById("tongRa").innerText = tongRa;
-            document.getElementById("tongLam").innerText = tongLam;
+let tongRa=r1+r2+r3;
+let tongLam=l1+l2+l3;
 
-            document.getElementById("hong1").innerText = Math.max(0, r1 - l1);
-            document.getElementById("hong2").innerText = Math.max(0, r2 - l2);
-            document.getElementById("hong3").innerText = Math.max(0, r3 - l3);
-            document.getElementById("tongHong").innerText = Math.max(0, tongRa - tongLam);
+document.getElementById(&quot;tongRa&quot;).innerText=tongRa;
+document.getElementById(&quot;tongLam&quot;).innerText=tongLam;
 
-            document.getElementById("phanTram").innerText =
-                tongRa ? (tongLam / tongRa * 100).toFixed(2) : 0;
-        }
+hong1.innerText=Math.max(0,r1-l1);
+hong2.innerText=Math.max(0,r2-l2);
+hong3.innerText=Math.max(0,r3-l3);
+tongHong.innerText=Math.max(0,tongRa-tongLam);
 
-        /* ===== TÍNH NGƯỢC – DAO ĐỘNG % ===== */
-        function tinhNguoc() {
-            let tongLam = +lamTongNhap.value || 0;
-            let pTB = +phanTramNhap.value || 0;
-            
-            if (!tongLam || !pTB) return;
+phanTram.innerText=tongRa?(tongLam/tongRa*100).toFixed(2):0;
+}
 
-            let d1 = Math.random() * 1.2 - 0.6;
-            let d2 = Math.random() * 1.2 - 0.6;
+function tinhNguoc(){
 
-            let p1 = pTB + d1;
-            let p2 = pTB + d2;
-            let p3 = pTB * 3 - p1 - p2;
+let tongLam = +lamTongNhap.value;
+let pTB = +phanTramNhap.value;
 
-            // Đảm bảo phần trăm không âm
-            p1 = Math.max(0, p1);
-            p2 = Math.max(0, p2);
-            p3 = Math.max(0, p3);
+if(!pTB){
+    alert(&quot;Nhập % trung bình trước!&quot;);
+    return;
+}
 
-            let l1 = Math.round(tongLam / 3);
-            let l2 = Math.round(tongLam / 3);
-            let l3 = tongLam - l1 - l2;
+if(pTB<=0||pTB>100){
+    alert(&quot;Phần trăm phải từ 0-100&quot;);
+    return;
+}
 
-            // Đảm bảo không âm
-            l1 = Math.max(0, l1);
-            l2 = Math.max(0, l2);
-            l3 = Math.max(0, l3);
+// Nếu không nhập tổng → tự lấy tổng hiện tại
+if(!tongLam){
+    tongLam=(+lam1.value||0)+(+lam2.value||0)+(+lam3.value||0);
+}
 
-            lam1.value = l1;
-            lam2.value = l2;
-            lam3.value = l3;
+let active=[];
+if((+lam1.value||0)>0) active.push(1);
+if((+lam2.value||0)>0) active.push(2);
+if((+lam3.value||0)>0) active.push(3);
 
-            ra1.value = p1 ? Math.round(l1 / (p1 / 100)) : 0;
-            ra2.value = p2 ? Math.round(l2 / (p2 / 100)) : 0;
-            ra3.value = p3 ? Math.round(l3 / (p3 / 100)) : 0;
+if(active.length===0){
+    active=[1];
+}
 
-            tinhToan();
-        }
+let soCuon=active.length;
+let lamValues=[];
+let conLai=tongLam;
 
-        /* ===== LƯU DỮ LIỆU ===== */
-        function luuDuLieu() {
-            // Kiểm tra nếu không có dữ liệu
-            if (!ra1.value && !ra2.value && !ra3.value && 
-                !lam1.value && !lam2.value && !lam3.value) {
-                alert("Vui lòng nhập dữ liệu trước khi lưu!");
-                return;
-            }
+// chia có dao động nhẹ
+for(let i=0;i<soCuon;i++){
+let min=(tongLam/soCuon)*0.95;
+let max=(tongLam/soCuon)*1.05;
 
-            let data = {
-                ra1: ra1.value || 0,
-                ra2: ra2.value || 0,
-                ra3: ra3.value || 0,
-                lam1: lam1.value || 0,
-                lam2: lam2.value || 0,
-                lam3: lam3.value || 0,
-                time: new Date().toLocaleString()
-            };
-            
-            let ds = JSON.parse(localStorage.getItem("tonghang")) || [];
-            ds.push(data);
-            localStorage.setItem("tonghang", JSON.stringify(ds));
-            
-            hienThi();
-            alert("Đã lưu dữ liệu!");
-        }
+let value;
 
-        function hienThi() {
-            let ds = JSON.parse(localStorage.getItem("tonghang")) || [];
-            dsLuu.innerHTML = "";
-            
-            if (ds.length === 0) {
-                dsLuu.innerHTML = &#39;<div class="saved-item">Chưa có dữ liệu</div>&#39;;
-                return;
-            }
-            
-            // Hiển thị theo thứ tự mới nhất lên đầu
-            ds.reverse().forEach((d, i) => {
-                dsLuu.innerHTML += `
-                <div class="saved-item">
-                    <span class="saved-time" onclick="load(${ds.length - 1 - i})">
-                        📅 ${d.time}<br>
-                        <small>Ra: ${d.ra1}/${d.ra2}/${d.ra3} | Làm: ${d.lam1}/${d.lam2}/${d.lam3}</small>
-                    </span>
-                    <span class="delete-icon" onclick="xoa(${ds.length - 1 - i})">❌</span>
-                </div>`;
-            });
-        }
+if(i===soCuon-1){
+value=conLai;
+}else{
+value=Math.floor(Math.random()*(max-min)+min);
+conLai-=value;
+}
+lamValues.push(value);
+}
 
-        function load(i) {
-            let ds = JSON.parse(localStorage.getItem("tonghang")) || [];
-            // Đảo ngược index vì đã reverse khi hiển thị
-            let actualIndex = ds.length - 1 - i;
-            let d = ds[actualIndex];
-            
-            ra1.value = d.ra1;
-            ra2.value = d.ra2;
-            ra3.value = d.ra3;
-            lam1.value = d.lam1;
-            lam2.value = d.lam2;
-            lam3.value = d.lam3;
-            tinhToan();
-            
-            // Cuộn lên đầu trang
-            window.scrollTo(0, 0);
-        }
+// reset
+lam1.value=lam2.value=lam3.value=&quot;&quot;;
 
-        function xoa(i) {
-            if (!confirm("Bạn có chắc muốn xóa dữ liệu này?")) return;
-            
-            let ds = JSON.parse(localStorage.getItem("tonghang")) || [];
-            // Đảo ngược index vì đã reverse khi hiển thị
-            let actualIndex = ds.length - 1 - i;
-            ds.splice(actualIndex, 1);
-            localStorage.setItem("tonghang", JSON.stringify(ds));
-            hienThi();
-        }
+// gán lam
+active.forEach((cuon,index)=>{
+if(cuon===1) lam1.value=lamValues[index];
+if(cuon===2) lam2.value=lamValues[index];
+if(cuon===3) lam3.value=lamValues[index];
+});
 
-        function xoaTatCa() {
-            if (!confirm("Bạn có chắc muốn xóa TẤT CẢ dữ liệu đã lưu?")) return;
-            
-            localStorage.removeItem("tonghang");
-            hienThi();
-            alert("Đã xóa tất cả dữ liệu!");
-        }
+// tạo % dao động
+let percentValues=[];
+let tongPercent=pTB*soCuon;
 
-        // Hiển thị dữ liệu đã lưu khi tải trang
-        hienThi();
-    </script>
+for(let i=0;i<soCuon-1;i++){
+let delta=(Math.random()*2)-1;
+let value=pTB+delta;
+value=Math.max(85,Math.min(100,value));
+percentValues.push(value);
+tongPercent-=value;
+}
+
+percentValues.push(tongPercent);
+
+// tính ra
+active.forEach((cuon,index)=>{
+let percent=percentValues[index];
+let lam=lamValues[index];
+let ra=Math.round(lam/(percent/100));
+
+if(cuon===1) ra1.value=ra;
+if(cuon===2) ra2.value=ra;
+if(cuon===3) ra3.value=ra;
+});
+
+tinhToan();
+}
+
+// ===== LƯU =====
+function luuDuLieu(){
+if(!ra1.value&amp;&amp;!ra2.value&amp;&amp;!ra3.value&amp;&amp;!lam1.value&amp;&amp;!lam2.value&amp;&amp;!lam3.value){
+alert(&quot;Không có dữ liệu để lưu!&quot;);
+return;
+}
+
+let data={
+ra1:ra1.value||0,
+ra2:ra2.value||0,
+ra3:ra3.value||0,
+lam1:lam1.value||0,
+lam2:lam2.value||0,
+lam3:lam3.value||0,
+time:new Date().toLocaleString()
+};
+
+let ds=JSON.parse(localStorage.getItem(&quot;tonghang&quot;))||[];
+ds.unshift(data);
+localStorage.setItem(&quot;tonghang&quot;,JSON.stringify(ds));
+hienThi();
+alert(&quot;Đã lưu!&quot;);
+}
+
+function hienThi(){
+let ds=JSON.parse(localStorage.getItem(&quot;tonghang&quot;))||[];
+dsLuu.innerHTML=&quot;&quot;;
+
+if(ds.length===0){
+dsLuu.innerHTML=&quot;Chưa có dữ liệu&quot;;
+return;
+}
+
+ds.forEach((d,i)=>{
+dsLuu.innerHTML+=`
+<div class=&quot;saved-item&quot;>
+<span>📅 ${d.time}<br>
+<small>Ra: ${d.ra1}/${d.ra2}/${d.ra3} | Làm: ${d.lam1}/${d.lam2}/${d.lam3}</small>
+</span>
+<span class=&quot;delete&quot; onclick=&quot;xoa(${i})&quot;>❌</span>
+</div>`;
+});
+}
+
+function xoa(i){
+let ds=JSON.parse(localStorage.getItem(&quot;tonghang&quot;))||[];
+ds.splice(i,1);
+localStorage.setItem(&quot;tonghang&quot;,JSON.stringify(ds));
+hienThi();
+}
+
+function xoaTatCa(){
+if(!confirm(&quot;Xóa tất cả dữ liệu?&quot;)) return;
+localStorage.removeItem(&quot;tonghang&quot;);
+hienThi();
+}
+
+hienThi();
+
+</script>
+
 </body>
-</html>'></iframe>
-<iframe style="width:100%;height:100vh;border:none" srcdoc='<!DOCTYPE html>
-<html lang="vi">
+</html>"></iframe>
+            </div>
+            <div id="tab-1" class="tab-content ">
+                <iframe srcdoc="<!DOCTYPE html>
+<html lang=&quot;vi&quot;>
 <head>
-<meta charset="UTF-8">
+<meta charset=&quot;UTF-8&quot;>
 <title>Ghi chép chi tiêu</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
 <style>
 body {
-    font-family: &#39;Segoe UI&#39;, Tahoma, Geneva, Verdana, sans-serif;
+    font-family: &apos;Segoe UI&apos;, Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     padding: 15px;
     margin: 0;
@@ -608,43 +457,43 @@ button:active {
 
 <h2>📒 Ghi chép chi tiêu</h2>
 
-<input id="newCategory" placeholder="Tên hạng mục mới">
-<div class="buttons-row">
-    <button class="add" onclick="addCategory()">
-        <span class="icon">➕</span> Thêm hạng mục
+<input id=&quot;newCategory&quot; placeholder=&quot;Tên hạng mục mới&quot;>
+<div class=&quot;buttons-row&quot;>
+    <button class=&quot;add&quot; onclick=&quot;addCategory()&quot;>
+        <span class=&quot;icon&quot;>➕</span> Thêm hạng mục
     </button>
 </div>
 
-<div class="buttons-row">
-    <button class="save" onclick="exportJSON()">
-        <span class="icon">💾</span> Lưu dữ liệu (.json)
+<div class=&quot;buttons-row&quot;>
+    <button class=&quot;save&quot; onclick=&quot;exportJSON()&quot;>
+        <span class=&quot;icon&quot;>💾</span> Lưu dữ liệu (.json)
     </button>
-    <button class="delete" onclick="clearAll()">
-        <span class="icon">🗑️</span> Xóa toàn bộ dữ liệu
+    <button class=&quot;delete&quot; onclick=&quot;clearAll()&quot;>
+        <span class=&quot;icon&quot;>🗑️</span> Xóa toàn bộ dữ liệu
     </button>
 </div>
 
-<div id="categories"></div>
-<div id="grandTotal">Tổng tất cả: 0</div>
+<div id=&quot;categories&quot;></div>
+<div id=&quot;grandTotal&quot;>Tổng tất cả: 0</div>
 
 <script>
-let data = JSON.parse(localStorage.getItem("expenses")) || {};
+let data = JSON.parse(localStorage.getItem(&quot;expenses&quot;)) || {};
 
-function save(){ localStorage.setItem("expenses", JSON.stringify(data)); }
+function save(){ localStorage.setItem(&quot;expenses&quot;, JSON.stringify(data)); }
 
 function addCategory(){
     const name = newCategory.value.trim();
-    if(!name) return alert("Vui lòng nhập tên hạng mục!");
-    if(data[name]) return alert("Hạng mục đã tồn tại!");
+    if(!name) return alert(&quot;Vui lòng nhập tên hạng mục!&quot;);
+    if(data[name]) return alert(&quot;Hạng mục đã tồn tại!&quot;);
     
     data[name] = [];
-    newCategory.value = "";
+    newCategory.value = &quot;&quot;;
     save(); 
     render();
 }
 
 function deleteCategory(cat){
-    if(confirm(`Xóa toàn bộ hạng mục "${cat}"?`)){
+    if(confirm(`Xóa toàn bộ hạng mục &quot;${cat}&quot;?`)){
         delete data[cat];
         save(); 
         render();
@@ -656,7 +505,7 @@ function addEntry(cat){
     const n = document.getElementById(`note-${cat}`);
     
     if(!a.value || parseFloat(a.value) <= 0) {
-        alert("Vui lòng nhập số tiền hợp lệ!");
+        alert(&quot;Vui lòng nhập số tiền hợp lệ!&quot;);
         a.focus();
         return;
     }
@@ -664,31 +513,31 @@ function addEntry(cat){
     data[cat].unshift({
         amount: parseFloat(a.value),
         note: n.value,
-        time: new Date().toLocaleString("vi-VN")
+        time: new Date().toLocaleString(&quot;vi-VN&quot;)
     });
     
-    a.value = ""; 
-    n.value = "";
+    a.value = &quot;&quot;; 
+    n.value = &quot;&quot;;
     save(); 
     render();
 }
 
 function editEntry(cat, i){
     const e = data[cat][i];
-    const amount = prompt("Sửa số tiền:", e.amount);
-    if(amount === null || amount === "") return;
+    const amount = prompt(&quot;Sửa số tiền:&quot;, e.amount);
+    if(amount === null || amount === &quot;&quot;) return;
     
-    const note = prompt("Sửa ghi chú:", e.note);
+    const note = prompt(&quot;Sửa ghi chú:&quot;, e.note);
     e.amount = parseFloat(amount);
     e.note = note;
-    e.time = new Date().toLocaleString("vi-VN") + " (đã sửa)";
+    e.time = new Date().toLocaleString(&quot;vi-VN&quot;) + &quot; (đã sửa)&quot;;
     
     save(); 
     render();
 }
 
 function deleteEntry(cat, i){
-    if(confirm("Xóa khoản chi này?")){
+    if(confirm(&quot;Xóa khoản chi này?&quot;)){
         data[cat].splice(i,1);
         save(); 
         render();
@@ -696,7 +545,7 @@ function deleteEntry(cat, i){
 }
 
 function clearAll(){
-    if(confirm("Bạn có chắc chắn muốn XÓA TOÀN BỘ dữ liệu không?\nHành động này không thể hoàn tác!")){
+    if(confirm(&quot;Bạn có chắc chắn muốn XÓA TOÀN BỘ dữ liệu không?\nHành động này không thể hoàn tác!&quot;)){
         data = {};
         save(); 
         render();
@@ -705,65 +554,65 @@ function clearAll(){
 
 function exportJSON(){
     if(Object.keys(data).length === 0) {
-        alert("Không có dữ liệu để xuất!");
+        alert(&quot;Không có dữ liệu để xuất!&quot;);
         return;
     }
     
-    const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-    const a = document.createElement("a");
+    const blob = new Blob([JSON.stringify(data,null,2)],{type:&quot;application/json&quot;});
+    const a = document.createElement(&quot;a&quot;);
     a.href = URL.createObjectURL(blob);
     a.download = `chi_tieu_${new Date().toISOString().slice(0,10)}.json`;
     a.click();
     
-    alert("Dữ liệu đã được xuất thành công!");
+    alert(&quot;Dữ liệu đã được xuất thành công!&quot;);
 }
 
 function render(){
-    const c = document.getElementById("categories");
-    c.innerHTML = "";
+    const c = document.getElementById(&quot;categories&quot;);
+    c.innerHTML = &quot;&quot;;
     let grand = 0;
 
     if(Object.keys(data).length === 0) {
-        c.innerHTML = `<div class="empty-state">Chưa có hạng mục nào. Hãy thêm hạng mục đầu tiên!</div>`;
-        document.getElementById("grandTotal").innerText = "Tổng tất cả: 0";
+        c.innerHTML = `<div class=&quot;empty-state&quot;>Chưa có hạng mục nào. Hãy thêm hạng mục đầu tiên!</div>`;
+        document.getElementById(&quot;grandTotal&quot;).innerText = &quot;Tổng tất cả: 0&quot;;
         return;
     }
 
     for(let cat in data){
         let sum = 0;
-        let html = `<div class="category">
-            <div class="category-header">
-                <h3 class="category-title">${cat}</h3>
-                <button class="delete category-delete" onclick="deleteCategory(&#39;${cat}&#39;)">
-                    <span class="icon">🗑️</span> Xóa hạng mục
+        let html = `<div class=&quot;category&quot;>
+            <div class=&quot;category-header&quot;>
+                <h3 class=&quot;category-title&quot;>${cat}</h3>
+                <button class=&quot;delete category-delete&quot; onclick=&quot;deleteCategory(&apos;${cat}&apos;)&quot;>
+                    <span class=&quot;icon&quot;>🗑️</span> Xóa hạng mục
                 </button>
             </div>
             
-            <div class="entry-form">
-                <input id="amount-${cat}" type="number" placeholder="Số tiền" min="1">
-                <textarea id="note-${cat}" placeholder="Ghi chú (có thể bỏ qua)" rows="2"></textarea>
-                <button class="add" onclick="addEntry(&#39;${cat}&#39;)">
-                    <span class="icon">➕</span> Thêm khoản chi
+            <div class=&quot;entry-form&quot;>
+                <input id=&quot;amount-${cat}&quot; type=&quot;number&quot; placeholder=&quot;Số tiền&quot; min=&quot;1&quot;>
+                <textarea id=&quot;note-${cat}&quot; placeholder=&quot;Ghi chú (có thể bỏ qua)&quot; rows=&quot;2&quot;></textarea>
+                <button class=&quot;add&quot; onclick=&quot;addEntry(&apos;${cat}&apos;)&quot;>
+                    <span class=&quot;icon&quot;>➕</span> Thêm khoản chi
                 </button>
             </div>`;
 
         if(data[cat].length === 0) {
-            html += `<div class="empty-state">Chưa có khoản chi nào trong hạng mục này</div>`;
+            html += `<div class=&quot;empty-state&quot;>Chưa có khoản chi nào trong hạng mục này</div>`;
         } else {
             data[cat].forEach((e,i)=>{
                 sum += e.amount;
-                html += `<div class="entry">
-                    <div class="entry-content">
-                        <div class="entry-amount">💰 ${e.amount.toLocaleString()} VND</div>
-                        ${e.note ? `<div class="entry-note">📝 ${e.note}</div>` : ""}
-                        <div class="entry-time">⏰ ${e.time}</div>
+                html += `<div class=&quot;entry&quot;>
+                    <div class=&quot;entry-content&quot;>
+                        <div class=&quot;entry-amount&quot;>💰 ${e.amount.toLocaleString()} VND</div>
+                        ${e.note ? `<div class=&quot;entry-note&quot;>📝 ${e.note}</div>` : &quot;&quot;}
+                        <div class=&quot;entry-time&quot;>⏰ ${e.time}</div>
                     </div>
-                    <div class="entry-actions">
-                        <button class="edit" onclick="editEntry(&#39;${cat}&#39;,${i})">
-                            <span class="icon">✏️</span> Sửa
+                    <div class=&quot;entry-actions&quot;>
+                        <button class=&quot;edit&quot; onclick=&quot;editEntry(&apos;${cat}&apos;,${i})&quot;>
+                            <span class=&quot;icon&quot;>✏️</span> Sửa
                         </button>
-                        <button class="delete" onclick="deleteEntry(&#39;${cat}&#39;,${i})">
-                            <span class="icon">❌</span> Xóa
+                        <button class=&quot;delete&quot; onclick=&quot;deleteEntry(&apos;${cat}&apos;,${i})&quot;>
+                            <span class=&quot;icon&quot;>❌</span> Xóa
                         </button>
                     </div>
                 </div>`;
@@ -771,30 +620,32 @@ function render(){
         }
 
         grand += sum;
-        html += `<div class="total">Tổng ${cat}: <span style="color:#27ae60">${sum.toLocaleString()} VND</span></div></div>`;
+        html += `<div class=&quot;total&quot;>Tổng ${cat}: <span style=&quot;color:#27ae60&quot;>${sum.toLocaleString()} VND</span></div></div>`;
         c.innerHTML += html;
     }
     
-    document.getElementById("grandTotal").innerText = `Tổng tất cả: ${grand.toLocaleString()} VND`;
+    document.getElementById(&quot;grandTotal&quot;).innerText = `Tổng tất cả: ${grand.toLocaleString()} VND`;
 }
 
 // Khởi chạy ứng dụng
-document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
     render();
     
     // Thêm sự kiện nhấn Enter để thêm hạng mục
-    document.getElementById(&#39;newCategory&#39;).addEventListener(&#39;keypress&#39;, function(e) {
-        if(e.key === &#39;Enter&#39;) addCategory();
+    document.getElementById(&apos;newCategory&apos;).addEventListener(&apos;keypress&apos;, function(e) {
+        if(e.key === &apos;Enter&apos;) addCategory();
     });
 });
 </script>
 </body>
-</html>'></iframe>
-<iframe style="width:100%;height:100vh;border:none" srcdoc='<!DOCTYPE html>
-<html lang="vi">
+</html>"></iframe>
+            </div>
+            <div id="tab-2" class="tab-content ">
+                <iframe srcdoc="<!DOCTYPE html>
+<html lang=&quot;vi&quot;>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset=&quot;UTF-8&quot;>
+<meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
 <title>Tính Lương Nhân Viên</title>
 <style>
 body { font-family: Arial; text-align: center; padding: 20px; }
@@ -804,44 +655,58 @@ table { margin: 20px auto; border-collapse: collapse; width: 95%; max-width: 650
 th, td { border: 1px solid #ccc; padding: 8px; text-align: right; }
 th { background: #f2f2f2; }
 td:first-child, th:first-child { text-align: left; }
+.note {
+    margin-top: 30px;
+    padding: 15px;
+    background: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 8px;
+    max-width: 650px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 14px;
+}
 </style>
 </head>
 
 <body>
 <h2>TÍNH LƯƠNG NHÂN VIÊN</h2>
 
+<label>Lương cơ bản (won/giờ):</label><br>
+<input type=&quot;number&quot; id=&quot;baseRate&quot; value=&quot;10030&quot;><br>
+
 <label>Số ngày làm CA NGÀY:</label><br>
-<input type="number" id="dayShiftDays" min="0"><br>
+<input type=&quot;number&quot; id=&quot;dayShiftDays&quot; min=&quot;0&quot;><br>
 
 <label>Số ngày làm CA ĐÊM (19h – 6h):</label><br>
-<input type="number" id="nightShiftDays" min="0"><br>
+<input type=&quot;number&quot; id=&quot;nightShiftDays&quot; min=&quot;0&quot;><br>
 
 <hr>
 
 <label>Số ngày làm thứ 7:</label><br>
-<input type="number" id="saturday8h" placeholder="8 tiếng">
-<input type="number" id="saturday10h" placeholder="10 tiếng"><br>
+<input type=&quot;number&quot; id=&quot;saturday8h&quot; placeholder=&quot;8 tiếng&quot;>
+<input type=&quot;number&quot; id=&quot;saturday10h&quot; placeholder=&quot;10 tiếng&quot;><br>
 
 <label>Số ngày làm chủ nhật:</label><br>
-<input type="number" id="sunday8h" placeholder="8 tiếng">
-<input type="number" id="sunday10h" placeholder="10 tiếng"><br>
+<input type=&quot;number&quot; id=&quot;sunday8h&quot; placeholder=&quot;8 tiếng&quot;>
+<input type=&quot;number&quot; id=&quot;sunday10h&quot; placeholder=&quot;10 tiếng&quot;><br>
 
 <label>Số chuyên cần (1 = 80,240 won):</label><br>
-<input type="number" id="attendanceBonusCount" min="0"><br>
+<input type=&quot;number&quot; id=&quot;attendanceBonusCount&quot; min=&quot;0&quot;><br>
 
-<label>
-<input type="checkbox" id="includeAllowance" checked>
-Cộng phụ cấp cố định 200,000 won
-</label><br><br>
+<button onclick=&quot;calculateSalary()&quot;>TÍNH LƯƠNG</button>
 
-<button onclick="calculateSalary()">TÍNH LƯƠNG</button>
+<div id=&quot;salaryDetails&quot;></div>
 
-<div id="salaryDetails"></div>
+<div class=&quot;note&quot;>
+<strong>Ghi chú:</strong><br>
+Tiền thuế tùy năm nếu làm 3 năm trở nên 1 năm nhận 2 triệu won thì mỗi tháng trừ gần 170k won
+</div>
 
 <script>
 function calculateSalary() {
 
-const rate = 10030;
+const rate = +document.getElementById(&quot;baseRate&quot;).value || 10320;
 const taxRate = 0.05;
 
 // CA NGÀY (8h thường + 2h tăng ca)
@@ -850,14 +715,13 @@ const dayShiftSalary = (8 * rate) + (2 * rate * 1.5);
 // CA ĐÊM (3h thường + 7.5h đêm ×1.5)
 const nightShiftSalary = (3 * rate) + (7.5 * rate * 1.5);
 
-// Thứ 7 & CN
+// Thứ 7 &amp; CN
 const sat8 = 8 * rate * 1.5;
 const sat10 = 10 * rate * 1.5;
 const sun8 = 8 * rate * 1.5;
 const sun10 = 10 * rate * 1.5;
 
 const attendanceUnit = 80240;
-const allowance = document.getElementById("includeAllowance").checked ? 200000 : 0;
 
 // Input
 let dayDays = +dayShiftDays.value || 0;
@@ -871,11 +735,12 @@ let attendance = +attendanceBonusCount.value || 0;
 // Tính
 let dayTotal = dayDays * dayShiftSalary;
 let nightTotal = nightDays * nightShiftSalary;
+
 let total =
 dayTotal + nightTotal +
 sat8d * sat8 + sat10d * sat10 +
 sun8d * sun8 + sun10d * sun10 +
-attendance * attendanceUnit + allowance;
+attendance * attendanceUnit;
 
 let tax = total * taxRate;
 let net = total - tax;
@@ -889,7 +754,6 @@ salaryDetails.innerHTML = `
 <tr><td>Thứ 7</td><td>${(sat8d*sat8 + sat10d*sat10).toLocaleString()}</td></tr>
 <tr><td>Chủ nhật</td><td>${(sun8d*sun8 + sun10d*sun10).toLocaleString()}</td></tr>
 <tr><td>Chuyên cần</td><td>${(attendance*attendanceUnit).toLocaleString()}</td></tr>
-<tr><td>Phụ cấp</td><td>${allowance.toLocaleString()}</td></tr>
 <tr><th>Tổng trước thuế</th><th>${total.toLocaleString()}</th></tr>
 <tr><td>Thuế 5%</td><td>${tax.toLocaleString()}</td></tr>
 <tr><th>Thực nhận</th><th>${net.toLocaleString()}</th></tr>
@@ -897,5 +761,15 @@ salaryDetails.innerHTML = `
 }
 </script>
 </body>
-</html>'></iframe></body>
+</html>"></iframe>
+            </div>
+    <script>
+        function openTab(evt, id) {
+            document.querySelectorAll('.nav li').forEach(l => l.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            evt.currentTarget.classList.add('active');
+            document.getElementById(id).classList.add('active');
+        }
+    </script>
+</body>
 </html>
