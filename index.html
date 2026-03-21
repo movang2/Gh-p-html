@@ -121,23 +121,21 @@ phanTram.innerText=tongRa?(tongLam/tongRa*100).toFixed(2):0;
 }
 
 function tinhNguoc(){
-
 let tongLam = +lamTongNhap.value;
 let pTB = +phanTramNhap.value;
 
 if(!pTB){
-    alert(&quot;Nhập % trung bình trước!&quot;);
-    return;
+alert(&quot;Nhập % trung bình trước!&quot;);
+return;
 }
 
 if(pTB<=0||pTB>100){
-    alert(&quot;Phần trăm phải từ 0-100&quot;);
-    return;
+alert(&quot;Phần trăm phải từ 0-100&quot;);
+return;
 }
 
-// Nếu không nhập tổng → tự lấy tổng hiện tại
 if(!tongLam){
-    tongLam=(+lam1.value||0)+(+lam2.value||0)+(+lam3.value||0);
+tongLam=(+lam1.value||0)+(+lam2.value||0)+(+lam3.value||0);
 }
 
 let active=[];
@@ -146,14 +144,13 @@ if((+lam2.value||0)>0) active.push(2);
 if((+lam3.value||0)>0) active.push(3);
 
 if(active.length===0){
-    active=[1];
+active=[1];
 }
 
 let soCuon=active.length;
 let lamValues=[];
 let conLai=tongLam;
 
-// chia có dao động nhẹ
 for(let i=0;i<soCuon;i++){
 let min=(tongLam/soCuon)*0.95;
 let max=(tongLam/soCuon)*1.05;
@@ -169,17 +166,14 @@ conLai-=value;
 lamValues.push(value);
 }
 
-// reset
 lam1.value=lam2.value=lam3.value=&quot;&quot;;
 
-// gán lam
 active.forEach((cuon,index)=>{
 if(cuon===1) lam1.value=lamValues[index];
 if(cuon===2) lam2.value=lamValues[index];
 if(cuon===3) lam3.value=lamValues[index];
 });
 
-// tạo % dao động
 let percentValues=[];
 let tongPercent=pTB*soCuon;
 
@@ -193,7 +187,6 @@ tongPercent-=value;
 
 percentValues.push(tongPercent);
 
-// tính ra
 active.forEach((cuon,index)=>{
 let percent=percentValues[index];
 let lam=lamValues[index];
@@ -214,13 +207,25 @@ alert(&quot;Không có dữ liệu để lưu!&quot;);
 return;
 }
 
+let tongRa = (+ra1.value||0)+(+ra2.value||0)+(+ra3.value||0);
+let tongLam = (+lam1.value||0)+(+lam2.value||0)+(+lam3.value||0);
+let tongHong = Math.max(0, tongRa - tongLam);
+let phanTram = tongRa ? (tongLam/tongRa*100).toFixed(2) : 0;
+
 let data={
 ra1:ra1.value||0,
 ra2:ra2.value||0,
 ra3:ra3.value||0,
+
 lam1:lam1.value||0,
 lam2:lam2.value||0,
 lam3:lam3.value||0,
+
+tongRa,
+tongLam,
+tongHong,
+phanTram,
+
 time:new Date().toLocaleString()
 };
 
@@ -231,6 +236,7 @@ hienThi();
 alert(&quot;Đã lưu!&quot;);
 }
 
+// ===== HIỂN THỊ =====
 function hienThi(){
 let ds=JSON.parse(localStorage.getItem(&quot;tonghang&quot;))||[];
 dsLuu.innerHTML=&quot;&quot;;
@@ -244,7 +250,11 @@ ds.forEach((d,i)=>{
 dsLuu.innerHTML+=`
 <div class=&quot;saved-item&quot;>
 <span>📅 ${d.time}<br>
-<small>Ra: ${d.ra1}/${d.ra2}/${d.ra3} | Làm: ${d.lam1}/${d.lam2}/${d.lam3}</small>
+<small>
+Ra: ${d.ra1}/${d.ra2}/${d.ra3} → Tổng: ${d.tongRa}<br>
+Làm: ${d.lam1}/${d.lam2}/${d.lam3} → Tổng: ${d.tongLam}<br>
+Hỏng: ${d.tongHong} | %: ${d.phanTram}%
+</small>
 </span>
 <span class=&quot;delete&quot; onclick=&quot;xoa(${i})&quot;>❌</span>
 </div>`;
