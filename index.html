@@ -45,38 +45,19 @@ button{width:100%;height:45px;margin-top:10px;border:none;border-radius:8px;font
 
 <h2>📊 TÍNH TOÁN SẢN PHẨM PRO</h2>
 
+<!-- Step [1]: Thêm nút điều khiển số lượng cuộn vào giao diện -->
+<div class=&quot;box&quot; style=&quot;display: flex; gap: 10px; align-items: center; justify-content: center;&quot;>
+  <button onclick=&quot;giamCuon()&quot; style=&quot;background: #f44336; color: white; margin-top: 0; flex: 1;&quot;>- Xóa cuộn bớt</button>
+  <span style=&quot;font-size: 18px; font-weight: bold; white-space: nowrap; padding: 0 10px;&quot;>Số cuộn: <span id=&quot;hienThiSoCuon&quot;>3</span></span>
+  <button onclick=&quot;tangCuon()&quot; style=&quot;background: #4CAF50; color: white; margin-top: 0; flex: 1;&quot;>+ Thêm cuộn</button>
+</div>
+
+<!-- Step [2]: Cấu trúc lại bảng HTML để hỗ trợ render động -->
 <table>
-<tr>
-<th></th>
-<th>Cuộn 1</th>
-<th>Cuộn 2</th>
-<th>Cuộn 3</th>
-<th>Tổng</th>
-</tr>
-
-<tr>
-<td>Hàng ra</td>
-<td><input id=&quot;ra1&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>
-<td><input id=&quot;ra2&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>
-<td><input id=&quot;ra3&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>
-<td id=&quot;tongRa&quot;>0</td>
-</tr>
-
-<tr>
-<td>Hàng làm</td>
-<td><input id=&quot;lam1&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>
-<td><input id=&quot;lam2&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>
-<td><input id=&quot;lam3&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>
-<td id=&quot;tongLam&quot;>0</td>
-</tr>
-
-<tr>
-<td>Hàng hỏng</td>
-<td id=&quot;hong1&quot;>0</td>
-<td id=&quot;hong2&quot;>0</td>
-<td id=&quot;hong3&quot;>0</td>
-<td id=&quot;tongHong&quot;>0</td>
-</tr>
+<tr id=&quot;hangTieuDe&quot;></tr>
+<tr id=&quot;hangRa&quot;></tr>
+<tr id=&quot;hangLam&quot;></tr>
+<tr id=&quot;hangHong&quot;></tr>
 </table>
 
 <div class=&quot;percent-box&quot;>
@@ -102,178 +83,358 @@ Phần trăm làm được: <span id=&quot;phanTram&quot;>0</span>%
 
 <script>
 
+// Step [3]: Viết hàm JavaScript quản lý số lượng cuộn (renderColumns)
+let soCuon = 3;
+
+function renderColumns() {
+  let currentRa = [];
+  let currentLam = [];
+  for (let i = 1; i <= 100; i++) {
+    let r = document.getElementById(`ra_${i}`);
+    let l = document.getElementById(`lam_${i}`);
+    if (r) currentRa[i] = r.value;
+    if (l) currentLam[i] = l.value;
+  }
+
+  let headerHtml = &apos;<th></th>&apos;;
+  for (let i = 1; i <= soCuon; i++) {
+    headerHtml += `<th>Cuộn ${i}</th>`;
+  }
+  headerHtml += &apos;<th>Tổng</th>&apos;;
+  document.getElementById(&quot;hangTieuDe&quot;).innerHTML = headerHtml;
+
+  let raHtml = &apos;<td>Hàng ra</td>&apos;;
+  for (let i = 1; i <= soCuon; i++) {
+    raHtml += `<td><input id=&quot;ra_${i}&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>`;
+  }
+  raHtml += &apos;<td id=&quot;tongRa&quot;>0</td>&apos;;
+  document.getElementById(&quot;hangRa&quot;).innerHTML = raHtml;
+
+  let lamHtml = &apos;<td>Hàng làm</td>&apos;;
+  for (let i = 1; i <= soCuon; i++) {
+    lamHtml += `<td><input id=&quot;lam_${i}&quot; type=&quot;number&quot; oninput=&quot;tinhToan()&quot;></td>`;
+  }
+  lamHtml += &apos;<td id=&quot;tongLam&quot;>0</td>&apos;;
+  document.getElementById(&quot;hangLam&quot;).innerHTML = lamHtml;
+
+  let hongHtml = &apos;<td>Hàng hỏng</td>&apos;;
+  for (let i = 1; i <= soCuon; i++) {
+    hongHtml += `<td id=&quot;hong_${i}&quot;>0</td>`;
+  }
+  hongHtml += &apos;<td id=&quot;tongHong&quot;>0</td>&apos;;
+  document.getElementById(&quot;hangHong&quot;).innerHTML = hongHtml;
+
+  for (let i = 1; i <= soCuon; i++) {
+    if (currentRa[i] !== undefined) {
+      let rInput = document.getElementById(`ra_${i}`);
+      if (rInput) rInput.value = currentRa[i];
+    }
+    if (currentLam[i] !== undefined) {
+      let lInput = document.getElementById(`lam_${i}`);
+      if (lInput) lInput.value = currentLam[i];
+    }
+  }
+
+  document.getElementById(&quot;hienThiSoCuon&quot;).innerText = soCuon;
+  tinhToan();
+}
+
+function tangCuon() {
+  soCuon++;
+  renderColumns();
+}
+
+function giamCuon() {
+  if (soCuon > 1) {
+    soCuon--;
+    renderColumns();
+  } else {
+    alert(&quot;Phải có ít nhất 1 cuộn!&quot;);
+  }
+}
+
+// Step [4]: Cập nhật hàm tính toán tinhToan() theo số lượng cuộn động
 function tinhToan(){
-let r1=+ra1.value||0,r2=+ra2.value||0,r3=+ra3.value||0;
-let l1=+lam1.value||0,l2=+lam2.value||0,l3=+lam3.value||0;
+  let tongRa = 0;
+  let tongLam = 0;
 
-let tongRa=r1+r2+r3;
-let tongLam=l1+l2+l3;
+  for (let i = 1; i <= soCuon; i++) {
+    let rInput = document.getElementById(`ra_${i}`);
+    let lInput = document.getElementById(`lam_${i}`);
+    let r = rInput ? (+rInput.value || 0) : 0;
+    let l = lInput ? (+lInput.value || 0) : 0;
 
-document.getElementById(&quot;tongRa&quot;).innerText=tongRa;
-document.getElementById(&quot;tongLam&quot;).innerText=tongLam;
+    tongRa += r;
+    tongLam += l;
 
-hong1.innerText=Math.max(0,r1-l1);
-hong2.innerText=Math.max(0,r2-l2);
-hong3.innerText=Math.max(0,r3-l3);
-tongHong.innerText=Math.max(0,tongRa-tongLam);
+    let hCell = document.getElementById(`hong_${i}`);
+    if (hCell) {
+      hCell.innerText = Math.max(0, r - l);
+    }
+  }
 
-phanTram.innerText=tongRa?(tongLam/tongRa*100).toFixed(2):0;
+  document.getElementById(&quot;tongRa&quot;).innerText = tongRa;
+  document.getElementById(&quot;tongLam&quot;).innerText = tongLam;
+  document.getElementById(&quot;tongHong&quot;).innerText = Math.max(0, tongRa - tongLam);
+
+  document.getElementById(&quot;phanTram&quot;).innerText = tongRa ? (tongLam / tongRa * 100).toFixed(2) : 0;
 }
 
+// Step [5]: Cập nhật hàm tự sinh thông minh tinhNguoc() với sai số chính xác từ 0.01% đến 0.1%
 function tinhNguoc(){
-let tongLam = +lamTongNhap.value;
-let pTB = +phanTramNhap.value;
+  let lamTongNhapRaw = document.getElementById(&quot;lamTongNhap&quot;).value;
+  // Step [3]: Xử lý giá trị mặc định khi bỏ trống Tổng làm được
+  let lamTongNhap = lamTongNhapRaw.trim() === &quot;&quot; ? (soCuon * 150) : +lamTongNhapRaw;
+  let pTB = +document.getElementById(&quot;phanTramNhap&quot;).value;
 
-if(!pTB){
-alert(&quot;Nhập % trung bình trước!&quot;);
-return;
+  if(!pTB){
+    alert(&quot;Nhập % trung bình trước!&quot;);
+    return;
+  }
+
+  if(pTB<=0||pTB>100){
+    alert(&quot;Phần trăm phải từ 0-100&quot;);
+    return;
+  }
+
+  let rolls = [];
+  let emptyRolls = [];
+  let sumExistingLam = 0;
+  let filledCount = 0;
+
+  // Step [1] &amp; [3]: Đọc trạng thái hiện tại và tự sinh chéo cho các ô bị khuyết một bên
+  for (let i = 1; i <= soCuon; i++) {
+    let rInput = document.getElementById(`ra_${i}`);
+    let lInput = document.getElementById(`lam_${i}`);
+    let rVal = rInput ? rInput.value.trim() : &quot;&quot;;
+    let lVal = lInput ? lInput.value.trim() : &quot;&quot;;
+
+    let r = rVal !== &quot;&quot; ? +rVal : null;
+    let l = lVal !== &quot;&quot; ? +lVal : null;
+
+    rolls[i] = { r, l, rInput, lInput };
+
+    // Tự sinh chéo nếu khuyết một bên
+    if (l !== null &amp;&amp; r === null) {
+      let percent = pTB + (Math.random() * 2 - 1);
+      percent = Math.max(85, Math.min(100, percent));
+      rolls[i].r = Math.round(l / (percent / 100));
+      if (rolls[i].rInput) rolls[i].rInput.value = rolls[i].r;
+    } else if (r !== null &amp;&amp; l === null) {
+      rolls[i].l = Math.round(r * (pTB / 100));
+      if (rolls[i].lInput) rolls[i].lInput.value = rolls[i].l;
+    }
+
+    if (rolls[i].l !== null) {
+      sumExistingLam += rolls[i].l;
+      filledCount++;
+    } else {
+      emptyRolls.push(i);
+    }
+  }
+
+  // Step [2]: Xử lý phân bổ thông minh cho các ô Hàng làm còn trống
+  if (emptyRolls.length > 0) {
+    let conLaiLam = lamTongNhap - sumExistingLam;
+    if (conLaiLam < 0) conLaiLam = 0;
+
+    let n = emptyRolls.length;
+    let allocatedLam = [];
+    let tempConLai = conLaiLam;
+
+    for (let j = 0; j < n; j++) {
+      if (j === n - 1) {
+        allocatedLam.push(Math.max(0, tempConLai));
+      } else {
+        let avg = tempConLai / (n - j);
+        let min = avg * 0.95;
+        let max = avg * 1.05;
+        let val = Math.floor(Math.random() * (max - min) + min);
+        val = Math.max(0, val);
+        allocatedLam.push(val);
+        tempConLai -= val;
+      }
+    }
+
+    // Điền giá trị tự sinh cho các ô trống cả hai bên
+    emptyRolls.forEach((cuon, index) => {
+      let lamVal = allocatedLam[index];
+      let percent = pTB + (Math.random() * 2 - 1);
+      percent = Math.max(85, Math.min(100, percent));
+      let raVal = Math.round(lamVal / (percent / 100));
+
+      let rInput = document.getElementById(`ra_${cuon}`);
+      let lInput = document.getElementById(`lam_${cuon}`);
+
+      if (lInput &amp;&amp; lInput.value.trim() === &quot;&quot;) {
+        lInput.value = lamVal;
+      }
+      if (rInput &amp;&amp; rInput.value.trim() === &quot;&quot;) {
+        rInput.value = raVal;
+      }
+    });
+  }
+
+  // --- ĐIỀU CHỈNH ĐỂ ĐẠT SAI SỐ CHÍNH XÁC TỪ 0.01% ĐẾN 0.1% ---
+  
+  // 1. Tự động nhân bản/scale up nếu tổng số lượng quá nhỏ để đạt độ chính xác 0.01%
+  let initialTRa = 0;
+  for (let i = 1; i <= soCuon; i++) {
+    let rInput = document.getElementById(`ra_${i}`);
+    initialTRa += rInput ? (+rInput.value || 0) : 0;
+  }
+  if (initialTRa > 0 &amp;&amp; initialTRa < 3000) {
+    let scale = Math.ceil(3000 / initialTRa);
+    for (let i = 1; i <= soCuon; i++) {
+      let rInput = document.getElementById(`ra_${i}`);
+      let lInput = document.getElementById(`lam_${i}`);
+      if (rInput) rInput.value = Math.round((+rInput.value || 0) * scale);
+      if (lInput) lInput.value = Math.round((+lInput.value || 0) * scale);
+    }
+    if (lamTongNhapRaw.trim() !== &quot;&quot;) {
+      document.getElementById(&quot;lamTongNhap&quot;).value = Math.round((+lamTongNhapRaw) * scale);
+    }
+  }
+
+  // 2. Vòng lặp điều chỉnh tinh vi (Feedback Loop Adjustment)
+  let attempts = 0;
+  while (attempts < 3000) {
+    let tRa = 0;
+    let tLam = 0;
+    for (let i = 1; i <= soCuon; i++) {
+      let r = +document.getElementById(`ra_${i}`).value || 0;
+      let l = +document.getElementById(`lam_${i}`).value || 0;
+      tRa += r;
+      tLam += l;
+    }
+
+    if (tRa === 0) break;
+
+    let pct = (tLam / tRa) * 100;
+    let absDiff = Math.abs(pct - pTB);
+
+    // Kiểm tra xem sai số đã nằm trong khoảng [0.01, 0.1] chưa
+    if (absDiff >= 0.01 &amp;&amp; absDiff <= 0.1) {
+      break; // Đạt yêu cầu!
+    }
+
+    // Chọn một cuộn ngẫu nhiên để cộng/trừ 1 đơn vị vào Hàng ra
+    let rollIndex = Math.floor(Math.random() * soCuon) + 1;
+    let rInput = document.getElementById(`ra_${rollIndex}`);
+    let lInput = document.getElementById(`lam_${rollIndex}`);
+    if (rInput) {
+      let r = +rInput.value || 0;
+      let l = lInput ? (+lInput.value || 0) : 0;
+
+      if (absDiff < 0.01) {
+        // Nếu sai số quá nhỏ (< 0.01%), ta cộng hoặc trừ 1 đơn vị ngẫu nhiên để đẩy nó vào khoảng [0.01, 0.1]
+        if (Math.random() < 0.5 &amp;&amp; r - 1 >= l) {
+          rInput.value = r - 1;
+        } else {
+          rInput.value = r + 1;
+        }
+      } else if (pct < pTB) {
+        // Phần trăm thực tế nhỏ hơn phần trăm nhập -> cần tăng phần trăm -> giảm Hàng ra (r)
+        if (r - 1 >= l) {
+          rInput.value = r - 1;
+        } else if (lInput) {
+          lInput.value = l + 1;
+        }
+      } else {
+        // Phần trăm thực tế lớn hơn phần trăm nhập -> cần giảm phần trăm -> tăng Hàng ra (r)
+        rInput.value = r + 1;
+      }
+    }
+    attempts++;
+  }
+
+  tinhToan();
 }
 
-if(pTB<=0||pTB>100){
-alert(&quot;Phần trăm phải từ 0-100&quot;);
-return;
-}
-
-if(!tongLam){
-tongLam=(+lam1.value||0)+(+lam2.value||0)+(+lam3.value||0);
-}
-
-let active=[];
-if((+lam1.value||0)>0) active.push(1);
-if((+lam2.value||0)>0) active.push(2);
-if((+lam3.value||0)>0) active.push(3);
-
-if(active.length===0){
-active=[1];
-}
-
-let soCuon=active.length;
-let lamValues=[];
-let conLai=tongLam;
-
-for(let i=0;i<soCuon;i++){
-let min=(tongLam/soCuon)*0.95;
-let max=(tongLam/soCuon)*1.05;
-
-let value;
-
-if(i===soCuon-1){
-value=conLai;
-}else{
-value=Math.floor(Math.random()*(max-min)+min);
-conLai-=value;
-}
-lamValues.push(value);
-}
-
-lam1.value=lam2.value=lam3.value=&quot;&quot;;
-
-active.forEach((cuon,index)=>{
-if(cuon===1) lam1.value=lamValues[index];
-if(cuon===2) lam2.value=lamValues[index];
-if(cuon===3) lam3.value=lamValues[index];
-});
-
-let percentValues=[];
-let tongPercent=pTB*soCuon;
-
-for(let i=0;i<soCuon-1;i++){
-let delta=(Math.random()*2)-1;
-let value=pTB+delta;
-value=Math.max(85,Math.min(100,value));
-percentValues.push(value);
-tongPercent-=value;
-}
-
-percentValues.push(tongPercent);
-
-active.forEach((cuon,index)=>{
-let percent=percentValues[index];
-let lam=lamValues[index];
-let ra=Math.round(lam/(percent/100));
-
-if(cuon===1) ra1.value=ra;
-if(cuon===2) ra2.value=ra;
-if(cuon===3) ra3.value=ra;
-});
-
-tinhToan();
-}
-
-// ===== LƯU =====
+// Step [6]: Cập nhật cấu trúc lưu trữ LocalStorage và hiển thị lịch sử
 function luuDuLieu(){
-if(!ra1.value&amp;&amp;!ra2.value&amp;&amp;!ra3.value&amp;&amp;!lam1.value&amp;&amp;!lam2.value&amp;&amp;!lam3.value){
-alert(&quot;Không có dữ liệu để lưu!&quot;);
-return;
+  let raArr = [];
+  let lamArr = [];
+  let hasData = false;
+
+  for (let i = 1; i <= soCuon; i++) {
+    let rVal = document.getElementById(`ra_${i}`) ? document.getElementById(`ra_${i}`).value : &quot;&quot;;
+    let lVal = document.getElementById(`lam_${i}`) ? document.getElementById(`lam_${i}`).value : &quot;&quot;;
+    raArr.push(rVal || 0);
+    lamArr.push(lVal || 0);
+    if (rVal || lVal) hasData = true;
+  }
+
+  if(!hasData){
+    alert(&quot;Không có dữ liệu để lưu!&quot;);
+    return;
+  }
+
+  let tongRa = raArr.reduce((a, b) => (+a) + (+b), 0);
+  let tongLam = lamArr.reduce((a, b) => (+a) + (+b), 0);
+  let tongHong = Math.max(0, tongRa - tongLam);
+  let phanTram = tongRa ? (tongLam/tongRa*100).toFixed(2) : 0;
+
+  let data={
+    ra: raArr,
+    lam: lamArr,
+    tongRa,
+    tongLam,
+    tongHong,
+    phanTram,
+    time:new Date().toLocaleString()
+  };
+
+  let ds=JSON.parse(localStorage.getItem(&quot;tonghang&quot;))||[];
+  ds.unshift(data);
+  localStorage.setItem(&quot;tonghang&quot;,JSON.stringify(ds));
+  hienThi();
+  alert(&quot;Đã lưu!&quot;);
 }
 
-let tongRa = (+ra1.value||0)+(+ra2.value||0)+(+ra3.value||0);
-let tongLam = (+lam1.value||0)+(+lam2.value||0)+(+lam3.value||0);
-let tongHong = Math.max(0, tongRa - tongLam);
-let phanTram = tongRa ? (tongLam/tongRa*100).toFixed(2) : 0;
-
-let data={
-ra1:ra1.value||0,
-ra2:ra2.value||0,
-ra3:ra3.value||0,
-
-lam1:lam1.value||0,
-lam2:lam2.value||0,
-lam3:lam3.value||0,
-
-tongRa,
-tongLam,
-tongHong,
-phanTram,
-
-time:new Date().toLocaleString()
-};
-
-let ds=JSON.parse(localStorage.getItem(&quot;tonghang&quot;))||[];
-ds.unshift(data);
-localStorage.setItem(&quot;tonghang&quot;,JSON.stringify(ds));
-hienThi();
-alert(&quot;Đã lưu!&quot;);
-}
-
-// ===== HIỂN THỊ =====
 function hienThi(){
-let ds=JSON.parse(localStorage.getItem(&quot;tonghang&quot;))||[];
-dsLuu.innerHTML=&quot;&quot;;
+  let ds=JSON.parse(localStorage.getItem(&quot;tonghang&quot;))||[];
+  let dsLuu = document.getElementById(&quot;dsLuu&quot;);
+  dsLuu.innerHTML=&quot;&quot;;
 
-if(ds.length===0){
-dsLuu.innerHTML=&quot;Chưa có dữ liệu&quot;;
-return;
-}
+  if(ds.length===0){
+    dsLuu.innerHTML=&quot;Chưa có dữ liệu&quot;;
+    return;
+  }
 
-ds.forEach((d,i)=>{
-dsLuu.innerHTML+=`
-<div class=&quot;saved-item&quot;>
-<span>📅 ${d.time}<br>
-<small>
-Ra: ${d.ra1}/${d.ra2}/${d.ra3} → Tổng: ${d.tongRa}<br>
-Làm: ${d.lam1}/${d.lam2}/${d.lam3} → Tổng: ${d.tongLam}<br>
-Hỏng: ${d.tongHong} | %: ${d.phanTram}%
-</small>
-</span>
-<span class=&quot;delete&quot; onclick=&quot;xoa(${i})&quot;>❌</span>
-</div>`;
-});
+  ds.forEach((d,i)=>{
+    let raStr = Array.isArray(d.ra) ? d.ra.join(&apos;/&apos;) : `${d.ra1 || 0}/${d.ra2 || 0}/${d.ra3 || 0}`;
+    let lamStr = Array.isArray(d.lam) ? d.lam.join(&apos;/&apos;) : `${d.lam1 || 0}/${d.lam2 || 0}/${d.lam3 || 0}`;
+
+    dsLuu.innerHTML+=`
+    <div class=&quot;saved-item&quot;>
+    <span>📅 ${d.time}<br>
+    <small>
+    Ra: ${raStr} → Tổng: ${d.tongRa}<br>
+    Làm: ${lamStr} → Tổng: ${d.tongLam}<br>
+    Hỏng: ${d.tongHong} | %: ${d.phanTram}%
+    </small>
+    </span>
+    <span class=&quot;delete&quot; onclick=&quot;xoa(${i})&quot;>❌</span>
+    </div>`;
+  });
 }
 
 function xoa(i){
-let ds=JSON.parse(localStorage.getItem(&quot;tonghang&quot;))||[];
-ds.splice(i,1);
-localStorage.setItem(&quot;tonghang&quot;,JSON.stringify(ds));
-hienThi();
+  let ds=JSON.parse(localStorage.getItem(&quot;tonghang&quot;))||[];
+  ds.splice(i,1);
+  localStorage.setItem(&quot;tonghang&quot;,JSON.stringify(ds));
+  hienThi();
 }
 
 function xoaTatCa(){
-if(!confirm(&quot;Xóa tất cả dữ liệu?&quot;)) return;
-localStorage.removeItem(&quot;tonghang&quot;);
-hienThi();
+  if(!confirm(&quot;Xóa tất cả dữ liệu?&quot;)) return;
+  localStorage.removeItem(&quot;tonghang&quot;);
+  hienThi();
 }
 
+// Khởi tạo giao diện ban đầu
+renderColumns();
 hienThi();
 
 </script>
