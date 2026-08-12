@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-    <ul class="nav"><li onclick="openTab(event, 'tab-0')" class="active">Tính hàng</li><li onclick="openTab(event, 'tab-1')" class="">Chi tiêu</li><li onclick="openTab(event, 'tab-2')" class="">Tính Lương</li></ul>
+    <ul class="nav"><li onclick="openTab(event, 'tab-0')" class="active">Tính hàng</li><li onclick="openTab(event, 'tab-1')" class="">Chi tiêu lịch</li><li onclick="openTab(event, 'tab-2')" class="">Tính Lương</li></ul>
     
             <div id="tab-0" class="tab-content active">
                 <iframe srcdoc="<!DOCTYPE html>
@@ -640,6 +640,138 @@ button:active {
 .icon {
     margin-right: 5px;
 }
+
+/* ===== Lịch đối chiếu chi tiêu ===== */
+.calendar-section{
+    margin-top:20px;
+    background:#111;
+    color:#fff;
+    border-radius:16px;
+    padding:14px 10px 16px;
+    box-shadow:0 4px 14px rgba(0,0,0,.15);
+}
+.calendar-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:4px 6px 12px;
+}
+.calendar-top button{
+    width:44px;
+    height:40px;
+    margin:0;
+    padding:0;
+    background:#292929;
+    color:#fff;
+    font-size:20px;
+}
+.calendar-title{
+    font-size:20px;
+    font-weight:700;
+}
+.calendar-week{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    text-align:center;
+    color:#999;
+    font-size:12px;
+    font-weight:600;
+    margin-bottom:4px;
+}
+.calendar-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:3px;
+}
+.calendar-day{
+    min-height:58px;
+    border-radius:9px;
+    padding:5px 3px 3px;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    cursor:pointer;
+    box-sizing:border-box;
+}
+.calendar-day:hover{background:#222;}
+.calendar-day.other-month{color:#555;}
+.calendar-day.today .day-number{
+    outline:2px solid #777;
+    outline-offset:1px;
+}
+.day-number{
+    width:28px;
+    height:28px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    font-size:14px;
+}
+.calendar-day.has-expense .day-number{
+    background:#5b3bb5;
+    color:#fff;
+    font-weight:700;
+}
+.calendar-day.selected{
+    background:#2a2240;
+}
+.calendar-dots{
+    display:flex;
+    gap:3px;
+    margin-top:4px;
+    flex-wrap:wrap;
+    justify-content:center;
+    max-width:48px;
+}
+.calendar-dot{
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:#8b63e8;
+}
+.calendar-amount{
+    font-size:9px;
+    color:#bdbdbd;
+    margin-top:3px;
+    white-space:nowrap;
+    max-width:52px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.calendar-detail{
+    margin-top:12px;
+    background:#191919;
+    border-radius:12px;
+    padding:12px;
+}
+.calendar-detail-title{
+    font-weight:700;
+    margin-bottom:8px;
+}
+.calendar-detail-total{
+    color:#8f6be8;
+    font-weight:700;
+    margin-bottom:8px;
+}
+.calendar-detail-entry{
+    border-top:1px solid #2b2b2b;
+    padding:8px 0 3px;
+    font-size:13px;
+}
+.calendar-detail-entry small{color:#999;}
+.calendar-empty{
+    color:#888;
+    font-size:13px;
+}
+.month-summary{
+    text-align:center;
+    color:#aaa;
+    font-size:12px;
+    margin-top:8px;
+}
+
 </style>
 </head>
 <body>
@@ -660,6 +792,25 @@ button:active {
     <button class=&quot;delete&quot; onclick=&quot;clearAll()&quot;>
         <span class=&quot;icon&quot;>🗑️</span> Xóa toàn bộ dữ liệu
     </button>
+</div>
+
+
+<div class=&quot;calendar-section&quot;>
+    <div class=&quot;calendar-top&quot;>
+        <button type=&quot;button&quot; onclick=&quot;changeMonth(-1)&quot;>‹</button>
+        <div class=&quot;calendar-title&quot; id=&quot;calendarTitle&quot;></div>
+        <button type=&quot;button&quot; onclick=&quot;changeMonth(1)&quot;>›</button>
+    </div>
+    <div class=&quot;calendar-week&quot;>
+        <div>T.2</div><div>T.3</div><div>T.4</div><div>T.5</div>
+        <div>T.6</div><div>T.7</div><div>CN</div>
+    </div>
+    <div class=&quot;calendar-grid&quot; id=&quot;calendarGrid&quot;></div>
+    <div class=&quot;month-summary&quot; id=&quot;monthSummary&quot;></div>
+    <div class=&quot;calendar-detail&quot; id=&quot;calendarDetail&quot;>
+        <div class=&quot;calendar-detail-title&quot;>Chọn một ngày</div>
+        <div class=&quot;calendar-empty&quot;>Các ngày có chi tiêu sẽ được đánh dấu màu tím.</div>
+    </div>
 </div>
 
 <div id=&quot;categories&quot;></div>
@@ -814,11 +965,207 @@ function render(){
     }
     
     document.getElementById(&quot;grandTotal&quot;).innerText = `Tổng tất cả: ${grand.toLocaleString()} VND`;
+    if(document.getElementById(&quot;calendarGrid&quot;)) renderCalendar();
 }
+
+
+// ===== Lịch đối chiếu chi tiêu =====
+let calendarDate = new Date();
+let selectedDateKey = dateKey(new Date());
+
+function pad2(n){ return String(n).padStart(2,&quot;0&quot;); }
+
+function dateKey(d){
+    return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+}
+
+function dateFromEntry(e){
+    // Các khoản mới có date; dữ liệu cũ chỉ có time nên cố gắng đọc từ time.
+    if(e.date &amp;&amp; /^\d{4}-\d{2}-\d{2}$/.test(e.date)) return e.date;
+    if(e.time){
+        const m = e.time.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if(m) return `${m[3]}-${pad2(m[2])}-${pad2(m[1])}`;
+    }
+    return &quot;&quot;;
+}
+
+function getExpensesByDate(){
+    const result = {};
+    for(const cat in data){
+        for(const e of data[cat]){
+            const key = dateFromEntry(e);
+            if(!key) continue;
+            if(!result[key]) result[key] = [];
+            result[key].push({cat, ...e});
+        }
+    }
+    return result;
+}
+
+function formatMoney(n){
+    return Number(n || 0).toLocaleString(&quot;vi-VN&quot;) + &quot; VND&quot;;
+}
+
+function renderCalendar(){
+    const grid = document.getElementById(&quot;calendarGrid&quot;);
+    const title = document.getElementById(&quot;calendarTitle&quot;);
+    const summary = document.getElementById(&quot;monthSummary&quot;);
+    const byDate = getExpensesByDate();
+
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+
+    title.textContent = `Tháng ${month+1} ${year}`;
+
+    // Lịch bắt đầu từ Thứ 2, giống ảnh.
+    const first = new Date(year, month, 1);
+    const mondayOffset = (first.getDay() + 6) % 7;
+    const daysInMonth = new Date(year, month+1, 0).getDate();
+    const prevDays = new Date(year, month, 0).getDate();
+
+    grid.innerHTML = &quot;&quot;;
+
+    for(let i=0; i<42; i++){
+        const cell = document.createElement(&quot;div&quot;);
+        cell.className = &quot;calendar-day&quot;;
+
+        let day, cellDate;
+        if(i < mondayOffset){
+            day = prevDays - mondayOffset + i + 1;
+            cellDate = new Date(year, month-1, day);
+            cell.classList.add(&quot;other-month&quot;);
+        } else if(i >= mondayOffset + daysInMonth){
+            day = i - (mondayOffset + daysInMonth) + 1;
+            cellDate = new Date(year, month+1, day);
+            cell.classList.add(&quot;other-month&quot;);
+        } else {
+            day = i - mondayOffset + 1;
+            cellDate = new Date(year, month, day);
+        }
+
+        const key = dateKey(cellDate);
+        const entries = byDate[key] || [];
+        const total = entries.reduce((s,e)=>s + Number(e.amount || 0), 0);
+
+        const num = document.createElement(&quot;div&quot;);
+        num.className = &quot;day-number&quot;;
+        num.textContent = day;
+        cell.appendChild(num);
+
+        if(key === dateKey(new Date())) cell.classList.add(&quot;today&quot;);
+        if(key === selectedDateKey) cell.classList.add(&quot;selected&quot;);
+
+        if(entries.length){
+            cell.classList.add(&quot;has-expense&quot;);
+            const dots = document.createElement(&quot;div&quot;);
+            dots.className = &quot;calendar-dots&quot;;
+            const uniqueCats = [...new Set(entries.map(e=>e.cat))];
+            uniqueCats.slice(0,4).forEach(()=> {
+                const dot = document.createElement(&quot;span&quot;);
+                dot.className = &quot;calendar-dot&quot;;
+                dots.appendChild(dot);
+            });
+            cell.appendChild(dots);
+
+            const amount = document.createElement(&quot;div&quot;);
+            amount.className = &quot;calendar-amount&quot;;
+            amount.textContent = total >= 1000000
+                ? (total/1000000).toFixed(1).replace(&quot;.0&quot;,&quot;&quot;) + &quot;tr&quot;
+                : total >= 1000
+                    ? Math.round(total/1000) + &quot;k&quot;
+                    : String(total);
+            cell.appendChild(amount);
+        }
+
+        cell.addEventListener(&quot;click&quot;, ()=>{
+            selectedDateKey = key;
+            renderCalendar();
+            showDateDetail(key);
+        });
+        grid.appendChild(cell);
+    }
+
+    let monthTotal = 0, count = 0;
+    Object.keys(byDate).forEach(key=>{
+        const d = new Date(key + &quot;T00:00:00&quot;);
+        if(d.getFullYear() === year &amp;&amp; d.getMonth() === month){
+            count += byDate[key].length;
+            monthTotal += byDate[key].reduce((s,e)=>s+Number(e.amount||0),0);
+        }
+    });
+    summary.textContent = `${count} khoản chi • Tổng tháng: ${formatMoney(monthTotal)}`;
+
+    showDateDetail(selectedDateKey);
+}
+
+function showDateDetail(key){
+    const box = document.getElementById(&quot;calendarDetail&quot;);
+    const byDate = getExpensesByDate();
+    const entries = byDate[key] || [];
+    const parts = key.split(&quot;-&quot;);
+    const dateText = `${parts[2]}/${parts[1]}/${parts[0]}`;
+    const total = entries.reduce((s,e)=>s+Number(e.amount||0),0);
+
+    let html = `<div class=&quot;calendar-detail-title&quot;>📅 Chi tiêu ngày ${dateText}</div>`;
+    if(!entries.length){
+        html += `<div class=&quot;calendar-empty&quot;>Không có khoản chi trong ngày này.</div>`;
+    } else {
+        html += `<div class=&quot;calendar-detail-total&quot;>Tổng: ${formatMoney(total)}</div>`;
+        entries.forEach(e=>{
+            html += `<div class=&quot;calendar-detail-entry&quot;>
+                💰 <b>${formatMoney(e.amount)}</b> — ${escapeHtml(e.cat)}
+                ${e.note ? `<div>📝 ${escapeHtml(e.note)}</div>` : &quot;&quot;}
+                <small>⏰ ${escapeHtml(e.time || &quot;&quot;)}</small>
+            </div>`;
+        });
+    }
+    box.innerHTML = html;
+}
+
+function escapeHtml(str){
+    return String(str ?? &quot;&quot;).replace(/[&amp;<>&quot;&apos;]/g, c => ({
+        &quot;&amp;&quot;:&quot;&amp;amp;&quot;,&quot;<&quot;:&quot;&amp;lt;&quot;,&quot;>&quot;:&quot;&amp;gt;&quot;,&apos;&quot;&apos;:&quot;&amp;quot;&quot;,&quot;&apos;&quot;:&quot;&amp;#039;&quot;
+    }[c]));
+}
+
+function changeMonth(delta){
+    calendarDate.setMonth(calendarDate.getMonth() + delta);
+    selectedDateKey = dateKey(new Date(calendarDate.getFullYear(), calendarDate.getMonth(), 1));
+    renderCalendar();
+}
+
+// Bản addEntry cũ được giữ nguyên nhưng thêm trường date để lịch đối chiếu chính xác.
+const originalAddEntry = addEntry;
+addEntry = function(cat){
+    const a = document.getElementById(`amount-${cat}`);
+    const n = document.getElementById(`note-${cat}`);
+
+    if(!a.value || parseFloat(a.value) <= 0) {
+        alert(&quot;Vui lòng nhập số tiền hợp lệ!&quot;);
+        a.focus();
+        return;
+    }
+
+    const now = new Date();
+    data[cat].unshift({
+        amount: parseFloat(a.value),
+        note: n.value,
+        time: now.toLocaleString(&quot;vi-VN&quot;),
+        date: dateKey(now)
+    });
+
+    a.value = &quot;&quot;;
+    n.value = &quot;&quot;;
+    save();
+    render();
+    renderCalendar();
+};
+
 
 // Khởi chạy ứng dụng
 document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
     render();
+    renderCalendar();
     
     // Thêm sự kiện nhấn Enter để thêm hạng mục
     document.getElementById(&apos;newCategory&apos;).addEventListener(&apos;keypress&apos;, function(e) {
