@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-    <ul class="nav"><li onclick="openTab(event, 'tab-0')" class="active">Tính hàng</li><li onclick="openTab(event, 'tab-1')" class="">Chi tiêu lịch</li><li onclick="openTab(event, 'tab-2')" class="">Tính Lương</li></ul>
+    <ul class="nav"><li onclick="openTab(event, 'tab-0')" class="active">Tính hàng</li><li onclick="openTab(event, 'tab-1')" class="">Chi tiêu</li><li onclick="openTab(event, 'tab-2')" class="">Tính Lương</li></ul>
     
             <div id="tab-0" class="tab-content active">
                 <iframe srcdoc="<!DOCTYPE html>
@@ -807,6 +807,7 @@ button:active {
     </div>
     <div class=&quot;calendar-grid&quot; id=&quot;calendarGrid&quot;></div>
     <div class=&quot;month-summary&quot; id=&quot;monthSummary&quot;></div>
+    <div id=&quot;selectedDateLabel&quot; style=&quot;text-align:center;color:#fff;font-size:14px;margin:8px 0 4px;font-weight:600;&quot;></div>
     <div class=&quot;calendar-detail&quot; id=&quot;calendarDetail&quot;>
         <div class=&quot;calendar-detail-title&quot;>Chọn một ngày</div>
         <div class=&quot;calendar-empty&quot;>Các ngày có chi tiêu sẽ được đánh dấu màu tím.</div>
@@ -929,6 +930,9 @@ function render(){
             </div>
             
             <div class=&quot;entry-form&quot;>
+                <div style=&quot;font-size:13px;color:#666;margin-bottom:5px;&quot;>
+                    📅 Ngày ghi: <b class=&quot;entry-date-label&quot;></b>
+                </div>
                 <input id=&quot;amount-${cat}&quot; type=&quot;number&quot; placeholder=&quot;Số tiền&quot; min=&quot;1&quot;>
                 <textarea id=&quot;note-${cat}&quot; placeholder=&quot;Ghi chú (có thể bỏ qua)&quot; rows=&quot;2&quot;></textarea>
                 <button class=&quot;add&quot; onclick=&quot;addEntry(&apos;${cat}&apos;)&quot;>
@@ -965,7 +969,13 @@ function render(){
     }
     
     document.getElementById(&quot;grandTotal&quot;).innerText = `Tổng tất cả: ${grand.toLocaleString()} VND`;
-    if(document.getElementById(&quot;calendarGrid&quot;)) renderCalendar();
+    if(document.getElementById(&quot;calendarGrid&quot;)){
+        renderCalendar();
+        const p = selectedDateKey.split(&quot;-&quot;);
+        document.querySelectorAll(&quot;.entry-date-label&quot;).forEach(el=>{
+            el.textContent = `${p[2]}/${p[1]}/${p[0]}`;
+        });
+    }
 }
 
 
@@ -1081,6 +1091,11 @@ function renderCalendar(){
             selectedDateKey = key;
             renderCalendar();
             showDateDetail(key);
+
+            const firstCategory = document.querySelector(&quot;.category&quot;);
+            if(firstCategory){
+                firstCategory.scrollIntoView({behavior:&quot;smooth&quot;, block:&quot;start&quot;});
+            }
         });
         grid.appendChild(cell);
     }
@@ -1094,6 +1109,13 @@ function renderCalendar(){
         }
     });
     summary.textContent = `${count} khoản chi • Tổng tháng: ${formatMoney(monthTotal)}`;
+
+    const selectedLabel = document.getElementById(&quot;selectedDateLabel&quot;);
+    if(selectedLabel){
+        const p = selectedDateKey.split(&quot;-&quot;);
+        const selectedIsToday = selectedDateKey === dateKey(new Date());
+        selectedLabel.innerHTML = `✏️ Đang ghi chi tiêu cho <b>${p[2]}/${p[1]}/${p[0]}</b>${selectedIsToday ? &quot; (Hôm nay)&quot; : &quot;&quot;}`;
+    }
 
     showDateDetail(selectedDateKey);
 }
@@ -1147,11 +1169,15 @@ addEntry = function(cat){
     }
 
     const now = new Date();
+    const expenseDate = selectedDateKey || dateKey(now);
+    const parts = expenseDate.split(&quot;-&quot;);
+    const displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+
     data[cat].unshift({
         amount: parseFloat(a.value),
         note: n.value,
-        time: now.toLocaleString(&quot;vi-VN&quot;),
-        date: dateKey(now)
+        time: `${displayDate} ${now.toLocaleTimeString(&quot;vi-VN&quot;)}`,
+        date: expenseDate
     });
 
     a.value = &quot;&quot;;
