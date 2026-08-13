@@ -755,6 +755,7 @@ button:active {
     font-weight:700;
     margin-bottom:8px;
 }
+.calendar-action{width:auto!important;margin:0!important;padding:7px 12px!important;}
 .calendar-detail-entry{
     border-top:1px solid #2b2b2b;
     padding:8px 0 3px;
@@ -1129,19 +1130,52 @@ function showDateDetail(key){
     const total = entries.reduce((s,e)=>s+Number(e.amount||0),0);
 
     let html = `<div class=&quot;calendar-detail-title&quot;>📅 Chi tiêu ngày ${dateText}</div>`;
+
     if(!entries.length){
         html += `<div class=&quot;calendar-empty&quot;>Không có khoản chi trong ngày này.</div>`;
     } else {
         html += `<div class=&quot;calendar-detail-total&quot;>Tổng: ${formatMoney(total)}</div>`;
+
         entries.forEach(e=>{
+            const originalIndex = data[e.cat].indexOf(e);
+            const catArg = String(e.cat).replace(/\\/g,&quot;\\\\&quot;).replace(/&apos;/g,&quot;\\&apos;&quot;);
+
             html += `<div class=&quot;calendar-detail-entry&quot;>
-                💰 <b>${formatMoney(e.amount)}</b> — ${escapeHtml(e.cat)}
+                <div>💰 <b>${formatMoney(e.amount)}</b>
+                    <span style=&quot;color:#aaa;&quot;> — ${escapeHtml(e.cat)}</span>
+                </div>
                 ${e.note ? `<div>📝 ${escapeHtml(e.note)}</div>` : &quot;&quot;}
                 <small>⏰ ${escapeHtml(e.time || &quot;&quot;)}</small>
+                <div style=&quot;display:flex;gap:7px;margin-top:7px;&quot;>
+                    <button type=&quot;button&quot; class=&quot;calendar-action&quot;
+                        style=&quot;background:#d35400;color:white;&quot;
+                        onclick=&quot;editEntryFromCalendar(&apos;${catArg}&apos;,${originalIndex})&quot;>✏️ Sửa</button>
+                    <button type=&quot;button&quot; class=&quot;calendar-action&quot;
+                        style=&quot;background:#c0392b;color:white;&quot;
+                        onclick=&quot;deleteEntryFromCalendar(&apos;${catArg}&apos;,${originalIndex})&quot;>❌ Xóa</button>
+                </div>
             </div>`;
         });
     }
     box.innerHTML = html;
+}
+
+function editEntryFromCalendar(cat, index){
+    editEntry(cat, index);
+    setTimeout(()=>{
+        renderCalendar();
+        showDateDetail(selectedDateKey);
+    }, 0);
+}
+
+function deleteEntryFromCalendar(cat, index){
+    if(confirm(&quot;Xóa khoản chi này?&quot;)){
+        data[cat].splice(index,1);
+        save();
+        render();
+        renderCalendar();
+        showDateDetail(selectedDateKey);
+    }
 }
 
 function escapeHtml(str){
