@@ -468,6 +468,9 @@ hienThi();
 <title>Ghi chép chi tiêu</title>
 <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
 <style>
+* {
+    box-sizing: border-box;
+}
 body {
     font-family: &apos;Segoe UI&apos;, Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
@@ -554,6 +557,8 @@ button:active {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    cursor: pointer;
+    user-select: none;
 }
 .entry:hover {
     background-color: #f9f9f9;
@@ -568,8 +573,23 @@ button:active {
     display: none;
     gap: 8px;
 }
-.entry:hover .entry-actions {
-    display: flex;
+/* Desktop: hover hiện nút */
+@media (min-width: 769px) {
+    .entry:hover .entry-actions {
+        display: flex;
+    }
+    .entry-actions.show {
+        display: flex !important;
+    }
+}
+/* Mobile: click mới hiện */
+@media (max-width: 768px) {
+    .entry-actions {
+        display: none !important;
+    }
+    .entry-actions.show {
+        display: flex !important;
+    }
 }
 .entry-actions button {
     width: auto;
@@ -615,6 +635,8 @@ button:active {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 .category-title {
     color: #2c3e50;
@@ -772,7 +794,10 @@ button:active {
     font-size:12px;
     margin-top:8px;
 }
-
+.entry-date-label {
+    font-weight: bold;
+    color: #3498db;
+}
 </style>
 </head>
 <body>
@@ -823,6 +848,44 @@ let data = JSON.parse(localStorage.getItem(&quot;expenses&quot;)) || {};
 
 function save(){ localStorage.setItem(&quot;expenses&quot;, JSON.stringify(data)); }
 
+// ===== Hàm tạo ID duy nhất =====
+function generateId() {
+    return Date.now() + &apos;_&apos; + Math.random().toString(36).substr(2, 9);
+}
+
+// ===== MIGRATION: Thêm ID cho dữ liệu cũ =====
+function migrateOldData() {
+    let needSave = false;
+    for (let cat in data) {
+        for (let i = 0; i < data[cat].length; i++) {
+            if (!data[cat][i].id) {
+                data[cat][i].id = generateId();
+                needSave = true;
+            }
+        }
+    }
+    if (needSave) {
+        save();
+        console.log(&quot;✅ Đã thêm ID cho dữ liệu cũ!&quot;);
+    }
+}
+
+// Gọi migration ngay khi load
+migrateOldData();
+
+// ===== Toggle nút xóa/sửa =====
+function toggleEntryActions(entryElement) {
+    const actions = entryElement.querySelector(&apos;.entry-actions&apos;);
+    if (actions) {
+        // Ẩn tất cả actions khác
+        document.querySelectorAll(&apos;.entry-actions.show&apos;).forEach(el => {
+            if (el !== actions) el.classList.remove(&apos;show&apos;);
+        });
+        actions.classList.toggle(&apos;show&apos;);
+    }
+}
+
+// ===== Quản lý hạng mục =====
 function addCategory(){
     const name = newCategory.value.trim();
     if(!name) return alert(&quot;Vui lòng nhập tên hạng mục!&quot;);
@@ -842,6 +905,7 @@ function deleteCategory(cat){
     }
 }
 
+// ===== Thêm khoản chi =====
 function addEntry(cat){
     const a = document.getElementById(`amount-${cat}`);
     const n = document.getElementById(`note-${cat}`);
@@ -852,20 +916,35 @@ function addEntry(cat){
         return;
     }
 
+    const now = new Date();
+    const expenseDate = selectedDateKey || dateKey(now);
+    const parts = expenseDate.split(&quot;-&quot;);
+    const displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+
     data[cat].unshift({
+        id: generateId(),
         amount: parseFloat(a.value),
         note: n.value,
-        time: new Date().toLocaleString(&quot;vi-VN&quot;)
+        time: `${displayDate} ${now.toLocaleTimeString(&quot;vi-VN&quot;)}`,
+        date: expenseDate
     });
     
     a.value = &quot;&quot;; 
     n.value = &quot;&quot;;
     save(); 
     render();
+    renderCalendar();
 }
 
-function editEntry(cat, i){
-    const e = data[cat][i];
+// ===== Sửa khoản chi =====
+function editEntryById(cat, id) {
+    const index = data[cat].findIndex(e => e.id === id);
+    if(index === -1) {
+        alert(&quot;❌ Không tìm thấy khoản chi!\nVui lòng thử lại.&quot;);
+        return;
+    }
+    
+    const e = data[cat][index];
     const amount = prompt(&quot;Sửa số tiền:&quot;, e.amount);
     if(amount === null || amount === &quot;&quot;) return;
     
@@ -876,16 +955,27 @@ function editEntry(cat, i){
     
     save(); 
     render();
+    renderCalendar();
+    showDateDetail(selectedDateKey);
 }
 
-function deleteEntry(cat, i){
+// ===== Xóa khoản chi =====
+function deleteEntryById(cat, id) {
     if(confirm(&quot;Xóa khoản chi này?&quot;)){
-        data[cat].splice(i,1);
-        save(); 
-        render();
+        const index = data[cat].findIndex(e => e.id === id);
+        if(index !== -1) {
+            data[cat].splice(index,1);
+            save(); 
+            render();
+            renderCalendar();
+            showDateDetail(selectedDateKey);
+        } else {
+            alert(&quot;❌ Không tìm thấy khoản chi để xóa!&quot;);
+        }
     }
 }
 
+// ===== Xóa toàn bộ =====
 function clearAll(){
     if(confirm(&quot;Bạn có chắc chắn muốn XÓA TOÀN BỘ dữ liệu không?\nHành động này không thể hoàn tác!&quot;)){
         data = {};
@@ -894,6 +984,7 @@ function clearAll(){
     }
 }
 
+// ===== Xuất JSON =====
 function exportJSON(){
     if(Object.keys(data).length === 0) {
         alert(&quot;Không có dữ liệu để xuất!&quot;);
@@ -906,9 +997,10 @@ function exportJSON(){
     a.download = `chi_tieu_${new Date().toISOString().slice(0,10)}.json`;
     a.click();
     
-    alert(&quot;Dữ liệu đã được xuất thành công!&quot;);
+    alert(&quot;✅ Dữ liệu đã được xuất thành công!&quot;);
 }
 
+// ===== Render chính =====
 function render(){
     const c = document.getElementById(&quot;categories&quot;);
     c.innerHTML = &quot;&quot;;
@@ -944,19 +1036,23 @@ function render(){
         if(data[cat].length === 0) {
             html += `<div class=&quot;empty-state&quot;>Chưa có khoản chi nào trong hạng mục này</div>`;
         } else {
-            data[cat].forEach((e,i)=>{
+            data[cat].forEach((e)=>{
                 sum += e.amount;
-                html += `<div class=&quot;entry&quot;>
+                // Escape dữ liệu để tránh lỗi
+                const safeCat = String(cat).replace(/\\/g,&quot;\\\\&quot;).replace(/&apos;/g,&quot;\\&apos;&quot;);
+                const safeId = String(e.id).replace(/\\/g,&quot;\\\\&quot;).replace(/&apos;/g,&quot;\\&apos;&quot;);
+                
+                html += `<div class=&quot;entry&quot; onclick=&quot;toggleEntryActions(this)&quot;>
                     <div class=&quot;entry-content&quot;>
                         <div class=&quot;entry-amount&quot;>💰 ${e.amount.toLocaleString()} VND</div>
                         ${e.note ? `<div class=&quot;entry-note&quot;>📝 ${e.note}</div>` : &quot;&quot;}
                         <div class=&quot;entry-time&quot;>⏰ ${e.time}</div>
                     </div>
                     <div class=&quot;entry-actions&quot;>
-                        <button class=&quot;edit&quot; onclick=&quot;editEntry(&apos;${cat}&apos;,${i})&quot;>
+                        <button class=&quot;edit&quot; onclick=&quot;event.stopPropagation(); editEntryById(&apos;${safeCat}&apos;,&apos;${safeId}&apos;)&quot;>
                             <span class=&quot;icon&quot;>✏️</span> Sửa
                         </button>
-                        <button class=&quot;delete&quot; onclick=&quot;deleteEntry(&apos;${cat}&apos;,${i})&quot;>
+                        <button class=&quot;delete&quot; onclick=&quot;event.stopPropagation(); deleteEntryById(&apos;${safeCat}&apos;,&apos;${safeId}&apos;)&quot;>
                             <span class=&quot;icon&quot;>❌</span> Xóa
                         </button>
                     </div>
@@ -970,6 +1066,8 @@ function render(){
     }
     
     document.getElementById(&quot;grandTotal&quot;).innerText = `Tổng tất cả: ${grand.toLocaleString()} VND`;
+    
+    // Cập nhật label ngày
     if(document.getElementById(&quot;calendarGrid&quot;)){
         renderCalendar();
         const p = selectedDateKey.split(&quot;-&quot;);
@@ -978,7 +1076,6 @@ function render(){
         });
     }
 }
-
 
 // ===== Lịch đối chiếu chi tiêu =====
 let calendarDate = new Date();
@@ -991,7 +1088,6 @@ function dateKey(d){
 }
 
 function dateFromEntry(e){
-    // Các khoản mới có date; dữ liệu cũ chỉ có time nên cố gắng đọc từ time.
     if(e.date &amp;&amp; /^\d{4}-\d{2}-\d{2}$/.test(e.date)) return e.date;
     if(e.time){
         const m = e.time.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
@@ -1007,7 +1103,7 @@ function getExpensesByDate(){
             const key = dateFromEntry(e);
             if(!key) continue;
             if(!result[key]) result[key] = [];
-            result[key].push({cat, ...e});
+            result[key].push({...e, cat});
         }
     }
     return result;
@@ -1028,7 +1124,6 @@ function renderCalendar(){
 
     title.textContent = `Tháng ${month+1} ${year}`;
 
-    // Lịch bắt đầu từ Thứ 2, giống ảnh.
     const first = new Date(year, month, 1);
     const mondayOffset = (first.getDay() + 6) % 7;
     const daysInMonth = new Date(year, month+1, 0).getDate();
@@ -1137,45 +1232,27 @@ function showDateDetail(key){
         html += `<div class=&quot;calendar-detail-total&quot;>Tổng: ${formatMoney(total)}</div>`;
 
         entries.forEach(e=>{
-            const originalIndex = data[e.cat].indexOf(e);
-            const catArg = String(e.cat).replace(/\\/g,&quot;\\\\&quot;).replace(/&apos;/g,&quot;\\&apos;&quot;);
-
+            const safeCat = String(e.cat).replace(/\\/g,&quot;\\\\&quot;).replace(/&apos;/g,&quot;\\&apos;&quot;);
+            const safeId = String(e.id).replace(/\\/g,&quot;\\\\&quot;).replace(/&apos;/g,&quot;\\&apos;&quot;);
+            
             html += `<div class=&quot;calendar-detail-entry&quot;>
                 <div>💰 <b>${formatMoney(e.amount)}</b>
                     <span style=&quot;color:#aaa;&quot;> — ${escapeHtml(e.cat)}</span>
                 </div>
                 ${e.note ? `<div>📝 ${escapeHtml(e.note)}</div>` : &quot;&quot;}
                 <small>⏰ ${escapeHtml(e.time || &quot;&quot;)}</small>
-                <div style=&quot;display:flex;gap:7px;margin-top:7px;&quot;>
+                <div style=&quot;display:flex;gap:7px;margin-top:7px;flex-wrap:wrap;&quot;>
                     <button type=&quot;button&quot; class=&quot;calendar-action&quot;
                         style=&quot;background:#d35400;color:white;&quot;
-                        onclick=&quot;editEntryFromCalendar(&apos;${catArg}&apos;,${originalIndex})&quot;>✏️ Sửa</button>
+                        onclick=&quot;editEntryById(&apos;${safeCat}&apos;,&apos;${safeId}&apos;)&quot;>✏️ Sửa</button>
                     <button type=&quot;button&quot; class=&quot;calendar-action&quot;
                         style=&quot;background:#c0392b;color:white;&quot;
-                        onclick=&quot;deleteEntryFromCalendar(&apos;${catArg}&apos;,${originalIndex})&quot;>❌ Xóa</button>
+                        onclick=&quot;deleteEntryById(&apos;${safeCat}&apos;,&apos;${safeId}&apos;)&quot;>❌ Xóa</button>
                 </div>
             </div>`;
         });
     }
     box.innerHTML = html;
-}
-
-function editEntryFromCalendar(cat, index){
-    editEntry(cat, index);
-    setTimeout(()=>{
-        renderCalendar();
-        showDateDetail(selectedDateKey);
-    }, 0);
-}
-
-function deleteEntryFromCalendar(cat, index){
-    if(confirm(&quot;Xóa khoản chi này?&quot;)){
-        data[cat].splice(index,1);
-        save();
-        render();
-        renderCalendar();
-        showDateDetail(selectedDateKey);
-    }
 }
 
 function escapeHtml(str){
@@ -1190,44 +1267,11 @@ function changeMonth(delta){
     renderCalendar();
 }
 
-// Bản addEntry cũ được giữ nguyên nhưng thêm trường date để lịch đối chiếu chính xác.
-const originalAddEntry = addEntry;
-addEntry = function(cat){
-    const a = document.getElementById(`amount-${cat}`);
-    const n = document.getElementById(`note-${cat}`);
-
-    if(!a.value || parseFloat(a.value) <= 0) {
-        alert(&quot;Vui lòng nhập số tiền hợp lệ!&quot;);
-        a.focus();
-        return;
-    }
-
-    const now = new Date();
-    const expenseDate = selectedDateKey || dateKey(now);
-    const parts = expenseDate.split(&quot;-&quot;);
-    const displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
-
-    data[cat].unshift({
-        amount: parseFloat(a.value),
-        note: n.value,
-        time: `${displayDate} ${now.toLocaleTimeString(&quot;vi-VN&quot;)}`,
-        date: expenseDate
-    });
-
-    a.value = &quot;&quot;;
-    n.value = &quot;&quot;;
-    save();
-    render();
-    renderCalendar();
-};
-
-
-// Khởi chạy ứng dụng
+// ===== Khởi chạy =====
 document.addEventListener(&apos;DOMContentLoaded&apos;, function() {
     render();
     renderCalendar();
     
-    // Thêm sự kiện nhấn Enter để thêm hạng mục
     document.getElementById(&apos;newCategory&apos;).addEventListener(&apos;keypress&apos;, function(e) {
         if(e.key === &apos;Enter&apos;) addCategory();
     });
