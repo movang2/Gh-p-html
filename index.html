@@ -936,7 +936,7 @@ function addEntry(cat){
     renderCalendar();
 }
 
-// ===== Sửa khoản chi =====
+// ===== Sửa khoản chi - ĐÃ SỬA LỖI =====
 function editEntryById(cat, id) {
     const index = data[cat].findIndex(e => e.id === id);
     if(index === -1) {
@@ -949,9 +949,21 @@ function editEntryById(cat, id) {
     if(amount === null || amount === &quot;&quot;) return;
     
     const note = prompt(&quot;Sửa ghi chú:&quot;, e.note);
+    if(note === null) return;
+    
+    // Lưu lại ngày cũ để giữ nguyên
+    const oldDate = e.date;
+    const oldTimeDisplay = e.time;
+    
+    // Cập nhật dữ liệu
     e.amount = parseFloat(amount);
     e.note = note;
-    e.time = new Date().toLocaleString(&quot;vi-VN&quot;) + &quot; (đã sửa)&quot;;
+    
+    // Giữ nguyên ngày, chỉ cập nhật phần giờ và thêm dấu hiệu đã sửa
+    const now = new Date();
+    const parts = oldDate.split(&quot;-&quot;);
+    const displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
+    e.time = `${displayDate} ${now.toLocaleTimeString(&quot;vi-VN&quot;)} (đã sửa)`;
     
     save(); 
     render();
@@ -1412,4 +1424,4 @@ salaryDetails.innerHTML = `
         }
     </script>
 </body>
-                    </html>
+</html>
