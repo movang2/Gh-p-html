@@ -347,8 +347,9 @@ function luuDuLieu(){
   for (let i = 1; i <= soCuon; i++) {
     let rVal = document.getElementById(`ra_${i}`) ? document.getElementById(`ra_${i}`).value : &quot;&quot;;
     let lVal = document.getElementById(`lam_${i}`) ? document.getElementById(`lam_${i}`).value : &quot;&quot;;
-    raArr.push(rVal || 0);
-    lamArr.push(lVal || 0);
+    // SỬA LỖI: Giữ nguyên giá trị rỗng (không ép thành 0)
+    raArr.push(rVal);
+    lamArr.push(lVal);
     if (rVal || lVal) hasData = true;
   }
 
@@ -853,7 +854,23 @@ function generateId() {
     return Date.now() + &apos;_&apos; + Math.random().toString(36).substr(2, 9);
 }
 
-// ===== MIGRATION: Thêm ID cho dữ liệu cũ =====
+// ===== Sắp xếp các khoản chi theo ngày giảm dần (gần nhất lên đầu) =====
+function sortCategory(cat) {
+    if (!data[cat]) return;
+    data[cat].sort((a, b) => {
+        const dateA = a.date || &apos;&apos;;
+        const dateB = b.date || &apos;&apos;;
+        if (dateA !== dateB) {
+            return dateB.localeCompare(dateA); // giảm dần
+        }
+        // Cùng ngày thì sắp xếp theo thời gian (time) giảm dần
+        const timeA = a.time || &apos;&apos;;
+        const timeB = b.time || &apos;&apos;;
+        return timeB.localeCompare(timeA);
+    });
+}
+
+// ===== MIGRATION: Thêm ID và sắp xếp dữ liệu cũ =====
 function migrateOldData() {
     let needSave = false;
     for (let cat in data) {
@@ -863,10 +880,18 @@ function migrateOldData() {
                 needSave = true;
             }
         }
+        // Sắp xếp lại dữ liệu cũ
+        sortCategory(cat);
     }
     if (needSave) {
         save();
-        console.log(&quot;✅ Đã thêm ID cho dữ liệu cũ!&quot;);
+        console.log(&quot;✅ Đã thêm ID và sắp xếp dữ liệu cũ!&quot;);
+    } else {
+        // Vẫn sắp xếp để đảm bảo thứ tự
+        for (let cat in data) {
+            sortCategory(cat);
+        }
+        save(); // lưu lại thứ tự mới
     }
 }
 
@@ -877,7 +902,6 @@ migrateOldData();
 function toggleEntryActions(entryElement) {
     const actions = entryElement.querySelector(&apos;.entry-actions&apos;);
     if (actions) {
-        // Ẩn tất cả actions khác
         document.querySelectorAll(&apos;.entry-actions.show&apos;).forEach(el => {
             if (el !== actions) el.classList.remove(&apos;show&apos;);
         });
@@ -921,7 +945,7 @@ function addEntry(cat){
     const parts = expenseDate.split(&quot;-&quot;);
     const displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
 
-    data[cat].unshift({
+    data[cat].push({  // dùng push thay vì unshift
         id: generateId(),
         amount: parseFloat(a.value),
         note: n.value,
@@ -931,12 +955,13 @@ function addEntry(cat){
     
     a.value = &quot;&quot;; 
     n.value = &quot;&quot;;
+    sortCategory(cat);
     save(); 
     render();
     renderCalendar();
 }
 
-// ===== Sửa khoản chi - ĐÃ SỬA LỖI =====
+// ===== Sửa khoản chi (giữ nguyên ngày, không thay đổi time) =====
 function editEntryById(cat, id) {
     const index = data[cat].findIndex(e => e.id === id);
     if(index === -1) {
@@ -951,20 +976,11 @@ function editEntryById(cat, id) {
     const note = prompt(&quot;Sửa ghi chú:&quot;, e.note);
     if(note === null) return;
     
-    // Lưu lại ngày cũ để giữ nguyên
-    const oldDate = e.date;
-    const oldTimeDisplay = e.time;
-    
-    // Cập nhật dữ liệu
+    // Chỉ cập nhật amount và note, giữ nguyên time và date
     e.amount = parseFloat(amount);
     e.note = note;
     
-    // Giữ nguyên ngày, chỉ cập nhật phần giờ và thêm dấu hiệu đã sửa
-    const now = new Date();
-    const parts = oldDate.split(&quot;-&quot;);
-    const displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
-    e.time = `${displayDate} ${now.toLocaleTimeString(&quot;vi-VN&quot;)} (đã sửa)`;
-    
+    sortCategory(cat);
     save(); 
     render();
     renderCalendar();
@@ -977,6 +993,7 @@ function deleteEntryById(cat, id) {
         const index = data[cat].findIndex(e => e.id === id);
         if(index !== -1) {
             data[cat].splice(index,1);
+            sortCategory(cat);
             save(); 
             render();
             renderCalendar();
@@ -1050,7 +1067,6 @@ function render(){
         } else {
             data[cat].forEach((e)=>{
                 sum += e.amount;
-                // Escape dữ liệu để tránh lỗi
                 const safeCat = String(cat).replace(/\\/g,&quot;\\\\&quot;).replace(/&apos;/g,&quot;\\&apos;&quot;);
                 const safeId = String(e.id).replace(/\\/g,&quot;\\\\&quot;).replace(/&apos;/g,&quot;\\&apos;&quot;);
                 
